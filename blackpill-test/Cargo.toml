@@ -1,0 +1,25 @@
+[package]
+authors = ["Walter Bonetti <bonettiw@amotus.ca>"]
+edition = "2021"
+readme = "README.md"
+name = "blackpill-test"
+version = "0.1.0"
+
+[dependencies]
+defmt = "0.3.0"
+defmt-rtt = "0.3.0"
+panic-probe = { version = "0.3.0", features = ["print-defmt"] }
+cortex-m = "0.7.6"
+cortex-m-rt = "0.7.2"
+stm32-hal2 = { version = "^1.4.8", features = ["f411", "f4rt", "embedded_hal"]}
+embedded-hal = { version = "0.2.5" }
+# graphics
+embedded-graphics = "0.7.1"
+
+# local libs
+bwit-gc9a01 = { path = "../gc9a01" }
+
+[[bin]]
+name = "blackpill_test"
+test = false
+bench = false
