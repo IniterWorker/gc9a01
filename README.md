@@ -21,9 +21,10 @@ SPI 4-wire driver for the Gc9a01 display driver
 - [x] Blackpill Playground
   - [x] SPI Setup
 - [x] Buy the hardware
-  - [ ] Delivery expected by 13 Dec 2022
+  - [x] Delivery expected by 13 Dec 2022
 - [ ] Implement write-only cmds
   - [x] Write-only operation
+  - [ ] Implement a working display init
   - [ ] Documentation
   - [ ] Test
 - [ ] Implement display rotation
