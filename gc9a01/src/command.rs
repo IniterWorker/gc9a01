@@ -844,7 +844,7 @@ impl Command {
                 3,
             ),
             Command::DisplayBrightness(dbv) => {
-                ([0x51, dbv as u8, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], 2)
+                ([0x51, dbv, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], 2)
             }
             Command::CtrlDisplay(bctrl, dd, bl) => (
                 [
@@ -889,9 +889,9 @@ impl Command {
             Command::BlankingPorchControl(vfp, vbp, hbp) => (
                 [
                     0xB5,
-                    vfp as u8,
-                    vbp as u8 & 0b0111_1111,
-                    hbp as u8 & 0b0001_1111,
+                    vfp,
+                    vbp & 0b0111_1111,
+                    hbp & 0b0001_1111,
                     0,
                     0,
                     0,
@@ -908,8 +908,8 @@ impl Command {
                 [
                     0xB6,
                     0,
-                    ((gs as u8 & 0b1) << 6) | ((ss as u8 & 0b1) << 5) | ((sm as u8 & 0b1) << 4),
-                    nl as u8 & 0b0001_1111,
+                    ((gs as u8 & 0b1) << 6) | ((ss as u8 & 0b1) << 5) | ((sm & 0b1) << 4),
+                    nl & 0b0001_1111,
                     0,
                     0,
                     0,
@@ -1048,9 +1048,9 @@ impl Command {
             ) => (
                 [
                     0xEC,
-                    ((avdd_clk_ad as u8 & 0b111) << 4) | avee_clk_ad & 0b111,
+                    ((avdd_clk_ad & 0b111) << 4) | avee_clk_ad & 0b111,
                     vcl_clk_ad & 0b111,
-                    ((vgh_clk_ad as u8 & 0b1111) << 4) | vgl_clk_ad & 0b1111,
+                    ((vgh_clk_ad & 0b1111) << 4) | vgl_clk_ad & 0b1111,
                     0,
                     0,
                     0,
@@ -1069,11 +1069,11 @@ impl Command {
                 [
                     0xF0,
                     // 0b001, 0b000_101
-                    (gamma.dig2j0_n as u8 & 0b11) << 6 | (gamma.vr1_n as u8 & 0b0011_1111),
-                    (gamma.dig2j1_n as u8 & 0b11) << 6 | (gamma.vr2_n as u8 & 0b0011_1111),
+                    (gamma.dig2j0_n & 0b11) << 6 | (gamma.vr1_n & 0b0011_1111),
+                    (gamma.dig2j1_n & 0b11) << 6 | (gamma.vr2_n & 0b0011_1111),
                     (gamma.vr4_n & 0b0001_1111),
                     (gamma.vr6_n & 0b0001_1111),
-                    (gamma.vr0_n as u8 & 0b1111) << 4 | (gamma.vr13_n as u8 & 0b0000_1111),
+                    (gamma.vr0_n & 0b1111) << 4 | (gamma.vr13_n & 0b0000_1111),
                     (gamma.vr20_n & 0b0111_1111),
                     0,
                     0,
@@ -1088,11 +1088,11 @@ impl Command {
                 [
                     0xF1,
                     (gamma.vr43_n & 0b0111_1111),
-                    (gamma.vr27_n as u8 & 0b111) << 5 | (gamma.vr57_n as u8 & 0b0001_1111),
-                    (gamma.vr36_n as u8 & 0b111) << 5 | (gamma.vr59_n as u8 & 0b0001_1111),
+                    (gamma.vr27_n & 0b111) << 5 | (gamma.vr57_n & 0b0001_1111),
+                    (gamma.vr36_n & 0b111) << 5 | (gamma.vr59_n & 0b0001_1111),
                     (gamma.vr61_n & 0b0011_1111),
                     (gamma.vr62_n & 0b0011_1111),
-                    (gamma.vr50_n as u8 & 0b1111) << 4 | (gamma.vr63_n as u8 & 0b0000_1111),
+                    (gamma.vr50_n & 0b1111) << 4 | (gamma.vr63_n & 0b0000_1111),
                     0,
                     0,
                     0,
@@ -1105,11 +1105,11 @@ impl Command {
             Command::SetGamma3(gamma) => (
                 [
                     0xF2,
-                    (gamma.dig2j0_p as u8 & 0b11) << 6 | (gamma.vr1_p as u8 & 0b0011_1111),
-                    (gamma.dig2j0_p as u8 & 0b11) << 6 | (gamma.vr2_p as u8 & 0b0011_1111),
+                    (gamma.dig2j0_p & 0b11) << 6 | (gamma.vr1_p & 0b0011_1111),
+                    (gamma.dig2j0_p & 0b11) << 6 | (gamma.vr2_p & 0b0011_1111),
                     (gamma.vr4_p & 0b0001_1111),
                     (gamma.vr6_p & 0b0001_1111),
-                    (gamma.vr0_p as u8 & 0b1111) << 4 | (gamma.vr13_p as u8 & 0b0000_1111),
+                    (gamma.vr0_p & 0b1111) << 4 | (gamma.vr13_p & 0b0000_1111),
                     (gamma.vr20_p & 0b0111_1111),
                     0,
                     0,
@@ -1124,11 +1124,11 @@ impl Command {
                 [
                     0xF3,
                     (gamma.vr43_p & 0b0111_1111),
-                    (gamma.vr27_p as u8 & 0b111) << 5 | (gamma.vr57_p as u8 & 0b0001_1111),
-                    (gamma.vr36_p as u8 & 0b111) << 5 | (gamma.vr59_p as u8 & 0b0001_1111),
+                    (gamma.vr27_p & 0b111) << 5 | (gamma.vr57_p & 0b0001_1111),
+                    (gamma.vr36_p & 0b111) << 5 | (gamma.vr59_p & 0b0001_1111),
                     (gamma.vr61_p & 0b0011_1111),
                     (gamma.vr62_p & 0b0011_1111),
-                    (gamma.vr50_p as u8 & 0b1111) << 4 | (gamma.vr63_p as u8 & 0b0000_1111),
+                    (gamma.vr50_p & 0b1111) << 4 | (gamma.vr63_p & 0b0000_1111),
                     0,
                     0,
                     0,
@@ -1211,8 +1211,7 @@ impl Command {
                         | (mv as u8) << 5
                         | (ml as u8) << 4
                         | (bgr as u8) << 3
-                        | (mh as u8) << 2
-                        | 0,
+                        | (mh as u8) << 2,
                     0,
                     0,
                     0,

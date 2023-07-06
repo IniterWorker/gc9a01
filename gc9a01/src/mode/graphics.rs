@@ -164,7 +164,7 @@ where
 
     // Turn a pixel on or off
     pub fn set_pixel(&mut self, x: u32, y: u32, value: u16) {
-        let value = value as u16;
+        let value = value;
         let rotation = self.display_rotation;
 
         let idx = match rotation {

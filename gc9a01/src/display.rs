@@ -105,25 +105,25 @@ impl DisplayDefinition for DisplayResolution240x240 {
         // gamma
         Command::SetGamma1(Gamma1 {
             dig2j0_n: 0b1,
-            vr1_n: 0b000_101,
+            vr1_n: 0b00_0101,
             dig2j1_n: 0b0,
-            vr2_n: 0b001_001,
+            vr2_n: 0b00_1001,
             vr4_n: 0b1000,
             vr6_n: 0b1000,
             vr0_n: 0b10,
             vr13_n: 0b0110,
-            vr20_n: 0b101_010,
+            vr20_n: 0b10_1010,
         })
         .send(iface)?;
 
         Command::SetGamma2(Gamma2 {
-            vr43_n: 0b1_000_011,
+            vr43_n: 0b100_0011,
             vr27_n: 0b11,
-            vr57_n: 0b10_000,
+            vr57_n: 0b1_0000,
             vr36_n: 0b11,
-            vr59_n: 0b10_010,
-            vr61_n: 0b110_110,
-            vr62_n: 0b110_111,
+            vr59_n: 0b1_0010,
+            vr61_n: 0b11_0110,
+            vr62_n: 0b11_0111,
             vr50_n: 0b110,
             vr63_n: 0b1111,
         })
@@ -131,25 +131,25 @@ impl DisplayDefinition for DisplayResolution240x240 {
 
         Command::SetGamma3(Gamma3 {
             dig2j0_p: 0b1,
-            vr1_p: 0b000_101,
+            vr1_p: 0b00_0101,
             dig2j1_p: 0b0,
-            vr2_p: 0b001_001,
+            vr2_p: 0b00_1001,
             vr4_p: 0b1000,
             vr6_p: 0b1000,
             vr0_p: 0b10,
             vr13_p: 0b0110,
-            vr20_p: 0b101_010,
+            vr20_p: 0b10_1010,
         })
         .send(iface)?;
 
         Command::SetGamma4(Gamma4 {
-            vr43_p: 0b1_000_011,
+            vr43_p: 0b100_0011,
             vr27_p: 0b11,
-            vr57_p: 0b10_000,
+            vr57_p: 0b1_0000,
             vr36_p: 0b11,
-            vr59_p: 0b10_010,
-            vr61_p: 0b110_110,
-            vr62_p: 0b110_111,
+            vr59_p: 0b1_0010,
+            vr61_p: 0b11_0110,
+            vr62_p: 0b11_0111,
             vr50_p: 0b110,
             vr63_p: 0b1111,
         })
