@@ -62,8 +62,6 @@ where
 
         let rotation = self.display_rotation;
 
-        Command::DisplayState(Logical::Off).send(&mut self.interface)?;
-
         // Dedicated/Custom implementation override
         self.display.configure(&mut self.interface)?;
 

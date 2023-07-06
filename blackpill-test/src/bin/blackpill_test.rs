@@ -77,14 +77,23 @@ fn main() -> ! {
     let i2c = I2c::new(dp.I2C1, I2cDevice::One, 400_000, &clock_cfg);
 
     // SPI 1
+    // SCL A Pin 5
     #[allow(unused_variables)]
     let sck = Pin::new(Port::A, 5, PinMode::Alt(5));
     #[allow(unused_variables)]
     let miso = Pin::new(Port::A, 6, PinMode::Alt(5));
+    // SDA A Pin 7
     #[allow(unused_variables)]
     let mosi = Pin::new(Port::A, 7, PinMode::Alt(5));
+    // CS A Pin 1
     #[allow(unused_variables, unused_mut)]
     let mut cs = Pin::new(Port::A, 1, PinMode::Output);
+    // DC A Pin
+    #[allow(unused_variables, unused_mut)]
+    let mut dc = Pin::new(Port::A, 4, PinMode::Output);
+    // Reset A Pin 2
+    #[allow(unused_variables, unused_mut)]
+    let mut reset = Pin::new(Port::A, 2, PinMode::Output);
 
     let spi_cfg = SpiConfig {
         mode: embedded_hal::spi::Mode {
@@ -95,10 +104,13 @@ fn main() -> ! {
         ..Default::default()
     };
 
-    let spi = Spi::new(dp.SPI1, spi_cfg, BaudRate::Div32);
-    let interface = SPIDisplayInterface::new(spi, miso, cs);
+    let spi = Spi::new(dp.SPI1, spi_cfg, BaudRate::Div256);
 
     defmt::debug!("SPI configured!");
+
+    let interface = SPIDisplayInterface::new(spi, dc, cs);
+
+    defmt::debug!("SPI interface display driver init...");
 
     let mut display_driver = Gc9a01::new(
         interface,

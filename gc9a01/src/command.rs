@@ -209,7 +209,32 @@ pub enum Command {
     ///
     TearingEffectLineOn(Logical),
 
-    /// Vertical Scrolling Start Address (38h)
+    /// Memory Access Control (36h)
+    ///
+    /// This command defines read/write scanning direction of frame memory.
+    /// This command makes no change on the other driver status
+    /// ## Parameters
+    ///
+    /// * MY Row Address Order
+    /// * MX Column Address Order These 3 bits control MCU to memory write/read direction.
+    /// * MV Row / Column Exchange
+    /// * ML Vertical Refresh Order LCD vertical refresh direction control.
+    /// * BGR RGB-BGR Order
+    /// * Color selector switch control (0=RGB color filter panel, 1=BGR color filter panel)
+    /// * MH Horizontal Refresh ORDER LCD horizontal refreshing direction control.
+    ///
+    /// # Description
+    ///
+    /// Note: When BGR bit is changed, the new setting is active immediately without update the content in
+    /// Frame Memory again.
+    ///
+    /// ## Restriction
+    ///
+    /// This command has no effect when Tearing Effect output is already ON
+    ///
+    MemoryAccessControl(Logical, Logical, Logical, Logical, Logical, Logical),
+
+    /// Vertical Scrolling Start Address (37h)
     ///
     /// ## Parameters
     /// * VSP `.0` => Vertical Start Page
@@ -551,6 +576,120 @@ pub enum Command {
     /// Inter_command should be set high to enable this command
     ///
     SetGamma4(Gamma4),
+
+    /// Set Undocumented EBh (EBh)
+    ///
+    SetUndocumented0EBh(u8),
+
+    /// Set Undocumented 084h (084h)
+    ///
+    SetUndocumented084h(u8),
+
+    /// Set Undocumented 085h (085h)
+    ///
+    SetUndocumented085h(u8),
+
+    /// Set Undocumented 086h (086h)
+    ///
+    SetUndocumented086h(u8),
+
+    /// Set Undocumented 087h (087h)
+    ///
+    SetUndocumented087h(u8),
+
+    /// Set Undocumented 088h (088h)
+    ///
+    SetUndocumented088h(u8),
+
+    /// Set Undocumented 089h (089h)
+    ///
+    SetUndocumented089h(u8),
+
+    /// Set Undocumented 08Ah (08Ah)
+    ///
+    SetUndocumented08Ah(u8),
+
+    /// Set Undocumented 08Bh (08Bh)
+    ///
+    SetUndocumented08Bh(u8),
+
+    /// Set Undocumented 08Ch (08Ch)
+    ///
+    SetUndocumented08Ch(u8),
+
+    /// Set Undocumented 08Dh (08Dh)
+    ///
+    SetUndocumented08Dh(u8),
+
+    /// Set Undocumented 08Eh (08Eh)
+    ///
+    SetUndocumented08Eh(u8),
+
+    /// Set Undocumented 08Fh (08Fh)
+    ///
+    SetUndocumented08Fh(u8),
+
+    /// Set Undocumented 090h (090h)
+    ///
+    SetUndocumented090h,
+
+    /// Set Undocumented 062h (0x62h)
+    ///
+    SetUndocumented062h,
+
+    /// Set Undocumented 063h (0x63h)
+    ///
+    SetUndocumented063h,
+
+    /// Set Undocumented 064h (0x64h)
+    ///
+    SetUndocumented064h,
+
+    /// Set Undocumented 066h (0x66h)
+    ///
+    SetUndocumented066h,
+
+    /// Set Undocumented 067h (0x67h)
+    ///
+    SetUndocumented067h,
+
+    /// Set Undocumented 074h (0x74h)
+    ///
+    SetUndocumented074h,
+
+    /// Set Undocumented 098h (0x98h)
+    ///
+    SetUndocumented098h,
+
+    ///Set SUndocumented 0BEh (0xBEh)
+    SetUndocumented0BEh,
+    ///Set SUndocumented 0BCh (0xBCh)
+    SetUndocumented0BCh,
+    ///Set SUndocumented 0BDh (0xBDh)
+    SetUndocumented0BDh,
+    ///Set SUndocumented 0E1h (0xE1h)
+    SetUndocumented0E1h,
+    ///Set SUndocumented 0DFh (0xDFh)
+    SetUndocumented0DFh,
+    ///Set SUndocumented 0EDh (0xEDh)
+    SetUndocumented0EDh,
+    ///Set SUndocumented 0AEh (0xAEh)
+    SetUndocumented0AEh,
+    ///Set SUndocumented 0CDh (0xCDh)
+    SetUndocumented0CDh,
+    ///Set SUndocumented 070h (0x70h)
+    SetUndocumented070h,
+    ///Set SUndocumented 0FFh (0xFFh)
+    SetUndocumented0FFh,
+
+    ///Set SUndocumented 011h (0x11h)
+    SetUndocumented011h,
+
+    ///Set SUndocumented 021h (0x21h)
+    SetUndocumented021h,
+
+    ///Set SUndocumented 029h (0x29h)
+    SetUndocumented029h,
 }
 
 // 6.2.23. Write Memory Contiue (3Ch)
@@ -579,19 +718,31 @@ impl Command {
         // Maximum 10 bytes
         // Array Size 5
         // Transform everything in 10 bytes array
-        let (data, len): ([u8; 7], usize) = match self {
-            Command::SleepMode(level) => ([0x10 | level as u8, 0, 0, 0, 0, 0, 0], 1),
-            Command::PartialMode => ([0x12, 0, 0, 0, 0, 0, 0], 1),
-            Command::NormalDisplayMode => ([0x13, 0, 0, 0, 0, 0, 0], 1),
-            Command::DisplayInversion(level) => ([0x20 | level as u8, 0, 0, 0, 0, 0, 0], 2),
-            Command::DisplayState(level) => ([0x28 | level as u8, 0, 0, 0, 0, 0, 0], 1),
+        let (data, len): ([u8; 13], usize) = match self {
+            Command::SleepMode(level) => {
+                ([0x10 | level as u8, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], 1)
+            }
+            Command::PartialMode => ([0x12, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], 1),
+            Command::NormalDisplayMode => ([0x13, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], 1),
+            Command::DisplayInversion(level) => {
+                ([0x20 | level as u8, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], 2)
+            }
+            Command::DisplayState(level) => {
+                ([0x28 | level as u8, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], 1)
+            }
             Command::ColumnAddressSet(sc, ec) => (
                 [
-                    0x002A,
+                    0x2A,
                     (sc & 0xFF) as u8,
                     ((sc >> 8) & 0xFF) as u8,
                     (ec & 0xFF) as u8,
                     ((ec >> 8) & 0xFF) as u8,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
                     0,
                     0,
                 ],
@@ -606,6 +757,12 @@ impl Command {
                     ((ep >> 8) & 0xFF) as u8,
                     0,
                     0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
                 ],
                 5,
             ),
@@ -618,16 +775,30 @@ impl Command {
                     ((vsa >> 8) & 0xFF) as u8,
                     0,
                     0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
                 ],
                 5,
             ),
-            Command::TearingEffectLineOff => ([0x34, 0, 0, 0, 0, 0, 0], 1),
-            Command::TearingEffectLineOn(mode) => ([0x35, mode as u8, 0, 0, 0, 0, 0], 2),
+            Command::TearingEffectLineOff => ([0x34, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], 1),
+            Command::TearingEffectLineOn(mode) => {
+                ([0x35, mode as u8, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], 2)
+            }
             Command::VerticalScrollStartAddresss(vsp) => (
                 [
-                    0x35,
+                    0x37,
                     (vsp & 0xFF) as u8,
                     ((vsp >> 8) & 0xFF) as u8,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
                     0,
                     0,
                     0,
@@ -635,10 +806,25 @@ impl Command {
                 ],
                 3,
             ),
-            Command::IdleMode(mode) => ([0x38 | mode as u8, 0, 0, 0, 0, 0, 0], 1),
-            Command::PixelFormatSet(dbi, dpi) => {
-                ([0x3A, ((dpi as u8) << 4) | (dbi as u8), 0, 0, 0, 0, 0], 2)
-            }
+            Command::IdleMode(mode) => ([0x38 | mode as u8, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], 1),
+            Command::PixelFormatSet(dbi, dpi) => (
+                [
+                    0x3A,
+                    ((dpi as u8) << 4) | (dbi as u8),
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                ],
+                2,
+            ),
             Command::SetTearScanline(sts) => (
                 [
                     0x44,
@@ -648,14 +834,28 @@ impl Command {
                     0,
                     0,
                     0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
                 ],
                 3,
             ),
-            Command::DisplayBrightness(dbv) => ([0x51, dbv as u8, 0, 0, 0, 0, 0], 2),
+            Command::DisplayBrightness(dbv) => {
+                ([0x51, dbv as u8, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], 2)
+            }
             Command::CtrlDisplay(bctrl, dd, bl) => (
                 [
                     0x53,
                     (bctrl as u8) << 5 | (dd as u8) << 3 | (bl as u8) << 2,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
                     0,
                     0,
                     0,
@@ -677,6 +877,12 @@ impl Command {
                     0,
                     0,
                     0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
                 ],
                 2,
             ),
@@ -686,6 +892,12 @@ impl Command {
                     vfp as u8,
                     vbp as u8 & 0b0111_1111,
                     hbp as u8 & 0b0001_1111,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
                     0,
                     0,
                     0,
@@ -701,6 +913,12 @@ impl Command {
                     0,
                     0,
                     0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
                 ],
                 4,
             ),
@@ -708,6 +926,12 @@ impl Command {
                 [
                     0xBA,
                     ((te_pol as u8) << 7) | (te_width & 0b0111_1111),
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
                     0,
                     0,
                     0,
@@ -725,25 +949,88 @@ impl Command {
                     0,
                     0,
                     0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
                 ],
                 2,
             ),
-            Command::PowerCriterioControl(vcire) => {
-                ([0xC1, ((vcire as u8 & 0b1) << 1), 0, 0, 0, 0, 0], 2)
+            Command::PowerCriterioControl(vcire) => (
+                [
+                    0xC1,
+                    ((vcire as u8 & 0b1) << 1),
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                ],
+                2,
+            ),
+            Command::VCoreVoltageControl(vddad) => (
+                [
+                    0xA7,
+                    0b0100_0000 | vddad as u8,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                ],
+                2,
+            ),
+            Command::Vreg1aVoltageControl(value) => {
+                ([0xC3, value, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], 2)
             }
-            Command::VCoreVoltageControl(vddad) => {
-                ([0xA7, 0b0100_0000 | vddad as u8, 0, 0, 0, 0, 0], 2)
+            Command::Vreg1bVoltageControl(value) => {
+                ([0xC4, value, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], 2)
             }
-            Command::Vreg1aVoltageControl(value) => ([0xC3, value, 0, 0, 0, 0, 0], 2),
-            Command::Vreg1bVoltageControl(value) => ([0xC4, value, 0, 0, 0, 0, 0], 2),
-            Command::Vreg2aVoltageControl(value) => ([0xC9, value, 0, 0, 0, 0, 0], 2),
-            Command::FrameRate(divn_mode) => {
-                ([0xE8, (divn_mode as u8 & 0b11) << 4, 0, 0, 0, 0, 0], 3)
+            Command::Vreg2aVoltageControl(value) => {
+                ([0xC9, value, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], 2)
             }
+            Command::FrameRate(divn_mode) => (
+                [
+                    0xE8,
+                    (divn_mode as u8 & 0b11) << 4,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                ],
+                3,
+            ),
             Command::Spi2dataControl(data2_en, data_format) => (
                 [
                     0xE9,
                     (data2_en as u8 & 0b1) << 3 | (data_format as u8 & 0b111),
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
                     0,
                     0,
                     0,
@@ -767,20 +1054,33 @@ impl Command {
                     0,
                     0,
                     0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
                 ],
                 4,
             ),
-            Command::InnerRegisterEnable1 => ([0xFE, 0, 0, 0, 0, 0, 0], 1),
-            Command::InnerRegisterEnable2 => ([0xEF, 0, 0, 0, 0, 0, 0], 1),
+            Command::InnerRegisterEnable1 => ([0xFE, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], 1),
+            Command::InnerRegisterEnable2 => ([0xEF, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], 1),
             Command::SetGamma1(gamma) => (
                 [
                     0xF0,
+                    // 0b001, 0b000_101
                     (gamma.dig2j0_n as u8 & 0b11) << 6 | (gamma.vr1_n as u8 & 0b0011_1111),
                     (gamma.dig2j1_n as u8 & 0b11) << 6 | (gamma.vr2_n as u8 & 0b0011_1111),
                     (gamma.vr4_n & 0b0001_1111),
                     (gamma.vr6_n & 0b0001_1111),
                     (gamma.vr0_n as u8 & 0b1111) << 4 | (gamma.vr13_n as u8 & 0b0000_1111),
                     (gamma.vr20_n & 0b0111_1111),
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
                 ],
                 7,
             ),
@@ -793,6 +1093,12 @@ impl Command {
                     (gamma.vr61_n & 0b0011_1111),
                     (gamma.vr62_n & 0b0011_1111),
                     (gamma.vr50_n as u8 & 0b1111) << 4 | (gamma.vr63_n as u8 & 0b0000_1111),
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
                 ],
                 7,
             ),
@@ -805,6 +1111,12 @@ impl Command {
                     (gamma.vr6_p & 0b0001_1111),
                     (gamma.vr0_p as u8 & 0b1111) << 4 | (gamma.vr13_p as u8 & 0b0000_1111),
                     (gamma.vr20_p & 0b0111_1111),
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
                 ],
                 7,
             ),
@@ -817,9 +1129,141 @@ impl Command {
                     (gamma.vr61_p & 0b0011_1111),
                     (gamma.vr62_p & 0b0011_1111),
                     (gamma.vr50_p as u8 & 0b1111) << 4 | (gamma.vr63_p as u8 & 0b0000_1111),
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
                 ],
                 7,
             ),
+            Command::SetUndocumented011h => ([0x11, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], 1),
+            Command::SetUndocumented021h => ([0x21, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], 1),
+            Command::SetUndocumented029h => ([0x29, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], 1),
+            Command::SetUndocumented0BEh => ([0xBE, 0x11, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], 2),
+            Command::SetUndocumented0BCh => ([0xBC, 0x00, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], 2),
+            Command::SetUndocumented0BDh => ([0xBD, 0x06, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], 2),
+            Command::SetUndocumented0E1h => ([0xE1, 0x10, 0x0E, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], 3),
+            Command::SetUndocumented0DFh => {
+                ([0xDF, 0x21, 0x0c, 0x02, 0, 0, 0, 0, 0, 0, 0, 0, 0], 4)
+            }
+            Command::SetUndocumented0EDh => ([0xED, 0x1B, 0x0B, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], 3),
+            Command::SetUndocumented0AEh => ([0xAE, 0x77, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], 2),
+            Command::SetUndocumented0CDh => ([0xCD, 0x63, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], 2),
+            Command::SetUndocumented070h => (
+                [
+                    0x70, 0x07, 0x07, 0x04, 0x0E, 0x0F, 0x09, 0x07, 0x08, 0x03, 0, 0, 0,
+                ],
+                10,
+            ),
+
+            Command::SetUndocumented0FFh => {
+                ([0xFF, 0x60, 0x01, 0x04, 0, 0, 0, 0, 0, 0, 0, 0, 0], 4)
+            }
+            Command::SetUndocumented0EBh(value) => {
+                ([0xEB, value, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], 2)
+            }
+            Command::SetUndocumented084h(value) => {
+                ([0x84, value, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], 2)
+            }
+            Command::SetUndocumented085h(value) => {
+                ([0x85, value, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], 2)
+            }
+            Command::SetUndocumented086h(value) => {
+                ([0x86, value, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], 2)
+            }
+            Command::SetUndocumented087h(value) => {
+                ([0x87, value, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], 2)
+            }
+            Command::SetUndocumented088h(value) => {
+                ([0x88, value, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], 2)
+            }
+            Command::SetUndocumented089h(value) => {
+                ([0x89, value, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], 2)
+            }
+            Command::SetUndocumented08Ah(value) => {
+                ([0x8A, value, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], 2)
+            }
+            Command::SetUndocumented08Bh(value) => {
+                ([0x8B, value, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], 2)
+            }
+            Command::SetUndocumented08Ch(value) => {
+                ([0x8C, value, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], 2)
+            }
+            Command::SetUndocumented08Dh(value) => {
+                ([0x8D, value, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], 2)
+            }
+            Command::SetUndocumented08Eh(value) => {
+                ([0x8E, value, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], 2)
+            }
+            Command::SetUndocumented08Fh(value) => {
+                ([0x8F, value, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], 2)
+            }
+            Command::SetUndocumented090h => {
+                ([0x90, 0x08, 0x08, 0x08, 0x08, 0, 0, 0, 0, 0, 0, 0, 0], 5)
+            }
+            Command::MemoryAccessControl(my, mx, mv, ml, bgr, mh) => (
+                [
+                    0x36,
+                    (my as u8) << 7
+                        | (mx as u8) << 6
+                        | (mv as u8) << 5
+                        | (ml as u8) << 4
+                        | (bgr as u8) << 3
+                        | (mh as u8) << 2
+                        | 0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                ],
+                2,
+            ),
+            Command::SetUndocumented062h => (
+                [
+                    0x62, 0x18, 0x0D, 0x71, 0xED, 0x70, 0x70, 0x18, 0x0F, 0x71, 0xEF, 0x70, 0x70,
+                ],
+                13,
+            ),
+            Command::SetUndocumented063h => (
+                [
+                    0x63, 0x18, 0x11, 0x71, 0xF1, 0x70, 0x70, 0x18, 0x13, 0x71, 0xF3, 0x70, 0x70,
+                ],
+                13,
+            ),
+            Command::SetUndocumented064h => (
+                [
+                    0x64, 0x28, 0x29, 0xF1, 0x01, 0xF1, 0x00, 0x07, 0, 0, 0, 0, 0,
+                ],
+                8,
+            ),
+            Command::SetUndocumented066h => (
+                [
+                    0x66, 0x3C, 0x00, 0xCD, 0x67, 0x45, 0x45, 0x10, 0x00, 0x00, 0x00, 0, 0,
+                ],
+                11,
+            ),
+            Command::SetUndocumented067h => (
+                [
+                    0x67, 0x00, 0x3C, 0x00, 0x00, 0x00, 0x01, 0x54, 0x10, 0x32, 0x98, 0, 0,
+                ],
+                11,
+            ),
+            Command::SetUndocumented074h => (
+                [
+                    0x74, 0x10, 0x85, 0x80, 0x00, 0x00, 0x4E, 0x00, 0, 0, 0, 0, 0,
+                ],
+                8,
+            ),
+            Command::SetUndocumented098h => ([0x98, 0x3e, 0x07, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], 3),
         };
 
         // Send command over the interface
