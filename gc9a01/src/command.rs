@@ -843,9 +843,7 @@ impl Command {
                 ],
                 3,
             ),
-            Command::DisplayBrightness(dbv) => {
-                ([0x51, dbv, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], 2)
-            }
+            Command::DisplayBrightness(dbv) => ([0x51, dbv, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], 2),
             Command::CtrlDisplay(bctrl, dd, bl) => (
                 [
                     0x53,
@@ -1006,7 +1004,7 @@ impl Command {
             Command::FrameRate(divn_mode) => (
                 [
                     0xE8,
-                    (divn_mode as u8 & 0b11) << 4,
+                    (divn_mode as u8 & 0b111) << 4,
                     0,
                     0,
                     0,
