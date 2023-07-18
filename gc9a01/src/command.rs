@@ -174,22 +174,8 @@ pub enum Command {
     ///
     VertialScrollDef(u16, u16),
 
-    /// Tearing Effect Line OFF (34h)
-    ///
-    /// This command turns off tearing effect line.
-    ///
-    /// # Description
-    ///
-    /// This command is used to turn OFF
-    /// (Active Low) the Tearing Effect output signal from the TE signal line.
-    ///
-    /// ## Restriction
-    ///
-    /// This command has no effect when Tearing Effect output is already OFF
-    ///
-    TearingEffectLineOff,
-
     /// Tearing Effect Line OFF (35h)
+    /// Tearing Effect Line OFF (34h)
     ///
     /// This command turns on tearing effect line with a parameters.
     ///
@@ -203,11 +189,15 @@ pub enum Command {
     /// This output is not affected by changing MADCTL bit B4. The Tearing Effect Line On has one parameter which describes
     /// the mode of the Tearing Effect Output Line.
     ///
+    /// This command is used to turn OFF
+    /// (Active Low) the Tearing Effect output signal from the TE signal line.
+    ///
+    ///
     /// ## Restriction
     ///
     /// This command has no effect when Tearing Effect output is already ON
     ///
-    TearingEffectLineOn(Logical),
+    TearingEffectLine(Logical),
 
     /// Memory Access Control (36h)
     ///
@@ -784,9 +774,8 @@ impl Command {
                 ],
                 5,
             ),
-            Command::TearingEffectLineOff => ([0x34, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], 1),
-            Command::TearingEffectLineOn(mode) => {
-                ([0x35, mode as u8, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], 2)
+            Command::TearingEffectLine(mode) => {
+                ([0x34 | mode as u8, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], 1)
             }
             Command::VerticalScrollStartAddresss(vsp) => (
                 [
@@ -918,7 +907,7 @@ impl Command {
                     0,
                     0,
                 ],
-                4,
+                3,
             ),
             Command::TEControl(te_pol, te_width) => (
                 [
@@ -1017,7 +1006,7 @@ impl Command {
                     0,
                     0,
                 ],
-                3,
+                2,
             ),
             Command::Spi2dataControl(data2_en, data_format) => (
                 [

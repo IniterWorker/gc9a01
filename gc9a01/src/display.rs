@@ -129,6 +129,7 @@ impl DisplayDefinition for DisplayResolution240x240 {
         })
         .send(iface)?;
 
+        // possible issue here
         Command::SetGamma3(Gamma3 {
             dig2j0_p: 0b1,
             vr1_p: 0b00_0101,
@@ -171,7 +172,7 @@ impl DisplayDefinition for DisplayResolution240x240 {
         Command::SetUndocumented074h.send(iface)?;
         Command::SetUndocumented098h.send(iface)?;
         // undocumented stuff here
-        Command::TearingEffectLineOn(Logical::Off).send(iface)?;
+        Command::TearingEffectLine(Logical::On).send(iface)?;
         Command::SetUndocumented021h.send(iface)?;
         Command::SetUndocumented011h.send(iface)?;
         Command::SetUndocumented029h.send(iface)?;
