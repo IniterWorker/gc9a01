@@ -94,6 +94,8 @@ fn main() -> ! {
     // Reset A Pin 2
     #[allow(unused_variables, unused_mut)]
     let mut reset = Pin::new(Port::A, 2, PinMode::Output);
+    // Set reset high before init
+    reset.set_high();
 
     let spi_cfg = SpiConfig {
         mode: embedded_hal::spi::Mode {
