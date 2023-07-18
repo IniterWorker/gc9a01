@@ -1093,7 +1093,7 @@ impl Command {
                 [
                     0xF2,
                     (gamma.dig2j0_p & 0b11) << 6 | (gamma.vr1_p & 0b0011_1111),
-                    (gamma.dig2j0_p & 0b11) << 6 | (gamma.vr2_p & 0b0011_1111),
+                    (gamma.dig2j1_p & 0b11) << 6 | (gamma.vr2_p & 0b0011_1111),
                     (gamma.vr4_p & 0b0001_1111),
                     (gamma.vr6_p & 0b0001_1111),
                     (gamma.vr0_p & 0b1111) << 4 | (gamma.vr13_p & 0b0000_1111),
