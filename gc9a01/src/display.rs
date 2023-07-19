@@ -84,7 +84,7 @@ impl DisplayDefinition for DisplayResolution240x240 {
         .send(iface)?;
 
         // maybe an issue
-        Command::PixelFormatSet(Dbi::Pixel18bits, Dpi::Pixel18bits).send(iface)?;
+        Command::PixelFormatSet(Dbi::Pixel16bits, Dpi::Pixel16bits).send(iface)?;
 
         Command::SetUndocumented090h.send(iface)?;
         Command::SetUndocumented0BDh.send(iface)?;
@@ -164,6 +164,8 @@ impl DisplayDefinition for DisplayResolution240x240 {
         // frame
         Command::FrameRate(DINVMode::Inversion8Dot).send(iface)?;
 
+        Command::DisplayInversion(Logical::Off).send(iface)?;
+
         Command::SetUndocumented062h.send(iface)?;
         Command::SetUndocumented063h.send(iface)?;
         Command::SetUndocumented064h.send(iface)?;
@@ -171,6 +173,7 @@ impl DisplayDefinition for DisplayResolution240x240 {
         Command::SetUndocumented067h.send(iface)?;
         Command::SetUndocumented074h.send(iface)?;
         Command::SetUndocumented098h.send(iface)?;
+
         // undocumented stuff here
         Command::TearingEffectLine(Logical::On).send(iface)?;
         Command::SetUndocumented021h.send(iface)?;

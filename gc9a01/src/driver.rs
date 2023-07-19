@@ -5,6 +5,8 @@ use super::mode::{BasicMode, BufferedGraphics};
 use super::rotation::DisplayRotation;
 
 use display_interface::{DataFormat, DisplayError, WriteOnlyDataCommand};
+use embedded_hal::blocking::delay::DelayMs;
+use embedded_hal::digital::v2::OutputPin;
 
 /// Gc9a01 Driver
 pub struct Gc9a01<I, D, M>
@@ -16,6 +18,35 @@ where
     pub(crate) display: D,
     pub(crate) mode: M,
     pub(crate) display_rotation: DisplayRotation,
+}
+
+impl<I, D, M> Gc9a01<I, D, M>
+where
+    I: WriteOnlyDataCommand,
+    D: DisplayDefinition,
+{
+    /// Reset the display.
+    pub fn reset<RST, DELAY>(&mut self, rst: &mut RST, delay: &mut DELAY) -> Result<(), RST::Error>
+    where
+        RST: OutputPin,
+        DELAY: DelayMs<u8>,
+    {
+        fn inner_reset<RST, DELAY>(rst: &mut RST, delay: &mut DELAY) -> Result<(), RST::Error>
+        where
+            RST: OutputPin,
+            DELAY: DelayMs<u8>,
+        {
+            rst.set_high()?;
+            delay.delay_ms(50);
+            rst.set_low()?;
+            delay.delay_ms(50);
+            rst.set_high()?;
+            delay.delay_ms(50);
+            Ok(())
+        }
+
+        inner_reset(rst, delay)
+    }
 }
 
 impl<I, D> Gc9a01<I, D, BasicMode>
@@ -160,16 +191,17 @@ where
         upper_left: (u16, u16),
         lower_right: (u16, u16),
     ) -> Result<(), DisplayError> {
+        Command::MemoryWrite.send(interface)?;
+
         let num_pages = (lower_right.1 - upper_left.1) as usize + 1;
 
-        // Each page is 8 bits tall, so calculate which page number to start at (rounded down) from
-        // the top of the display
         let starting_page = (upper_left.1) as usize;
 
         // Calculate start and end X coordinates for each page
         let page_lower = upper_left.0 as usize;
         let page_upper = lower_right.0 as usize;
 
+        // TODO: improve this
         buffer
             .chunks(disp_width)
             .skip(starting_page)

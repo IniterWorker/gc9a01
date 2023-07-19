@@ -74,19 +74,19 @@ where
             *b = 0;
         }
 
-        let (max_x, max_y) = self.bounds();
+        let (max_x, max_y) = self.dimensions();
         self.mode.min_x = u16::MIN;
         self.mode.max_x = max_x;
         self.mode.min_y = u16::MIN;
         self.mode.max_y = max_y;
     }
 
-    pub fn fill(&mut self) {
+    pub fn fill(&mut self, color: u16) {
         for b in self.mode.buffer.as_mut() {
-            *b = u16::MAX;
+            *b = color;
         }
 
-        let (max_x, max_y) = self.bounds();
+        let (max_x, max_y) = self.dimensions();
         self.mode.min_x = u16::MIN;
         self.mode.max_x = max_x;
         self.mode.min_y = u16::MIN;
@@ -104,17 +104,15 @@ where
 
         // Determine witch bytes need to be sent
         let disp_min_x = self.mode.min_x;
-        let disp_min_y = self.mode.min_x;
+        let disp_min_y = self.mode.min_y;
 
         let (disp_max_x, disp_max_y) = match self.display_rotation {
-            DisplayRotation::Rotate0 | DisplayRotation::Rotate180 => (
-                (self.mode.max_x + 1).min(width),
-                (self.mode.max_y | 7).min(height),
-            ),
-            DisplayRotation::Rotate90 | DisplayRotation::Rotate270 => (
-                (self.mode.max_x | 7).min(width),
-                (self.mode.max_y + 1).min(height),
-            ),
+            DisplayRotation::Rotate0 | DisplayRotation::Rotate180 => {
+                ((self.mode.max_x).min(width), (self.mode.max_y).min(height))
+            }
+            DisplayRotation::Rotate90 | DisplayRotation::Rotate270 => {
+                ((self.mode.max_x).min(width), (self.mode.max_y).min(height))
+            }
         };
 
         // reset idle state
@@ -169,10 +167,10 @@ where
 
         let idx = match rotation {
             DisplayRotation::Rotate0 | DisplayRotation::Rotate180 => {
-                ((y as usize) / D::WIDTH as usize) + (x as usize)
+                ((y as usize) * D::WIDTH as usize) + (x as usize)
             }
             DisplayRotation::Rotate90 | DisplayRotation::Rotate270 => {
-                ((x as usize) / D::WIDTH as usize) + (y as usize)
+                ((x as usize) * D::HEIGHT as usize) + (y as usize)
             }
         };
 
@@ -182,7 +180,7 @@ where
             self.mode.min_y = self.mode.min_y.min(y as u16);
             self.mode.max_y = self.mode.max_y.max(y as u16);
 
-            *byte = value
+            *byte = (value >> 8) & 0xFF | (value << 8) & 0xFF00;
         }
     }
 }
@@ -192,7 +190,7 @@ use embedded_graphics_core::{
     draw_target::DrawTarget,
     geometry::Size,
     geometry::{Dimensions, OriginDimensions},
-    pixelcolor::Bgr565,
+    pixelcolor::Rgb565,
     Pixel,
 };
 
@@ -217,7 +215,7 @@ where
     D: DisplayDefinition,
 {
     // TODO: figure out a way to handle all case
-    type Color = Bgr565;
+    type Color = Rgb565;
     type Error = DisplayError;
 
     fn draw_iter<O>(&mut self, pixels: O) -> Result<(), Self::Error>

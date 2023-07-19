@@ -6,7 +6,7 @@ use cortex_m_rt::entry;
 use gc9a01::{mode::BufferedGraphics, prelude::*, Gc9a01, SPIDisplayInterface};
 
 use embedded_graphics::{
-    pixelcolor::Bgr565,
+    pixelcolor::Rgb565,
     prelude::{Point, RgbColor},
     primitives::{Circle, Primitive, PrimitiveStyleBuilder},
     Drawable,
@@ -27,21 +27,22 @@ use panic_probe as _;
 /// Test Function : will be removed later
 fn draw<I: WriteOnlyDataCommand, D: DisplayDefinition>(
     display: &mut Gc9a01<I, D, BufferedGraphics<D>>,
-    tick: i32,
+    tick: u32,
 ) {
     let (w, h) = display.dimensions();
-    let w = w as i32;
-    let h = h as i32;
+    let w = w as u32;
+    let h = h as u32;
     let x = tick % w;
     let y = tick % h;
 
     let style = PrimitiveStyleBuilder::new()
-        .stroke_width(1)
-        .stroke_color(Bgr565::WHITE)
+        .stroke_width(4)
+        .stroke_color(Rgb565::BLUE)
+        .fill_color(Rgb565::RED)
         .build();
 
     // circle
-    Circle::new(Point::new(w / 2 + x, h / 2 + y), 20)
+    Circle::new(Point::new(x as i32, y as i32), 200)
         .into_styled(style)
         .draw(display)
         .unwrap();
@@ -94,8 +95,6 @@ fn main() -> ! {
     // Reset A Pin 2
     #[allow(unused_variables, unused_mut)]
     let mut reset = Pin::new(Port::A, 2, PinMode::Output);
-    // Set reset high before init
-    reset.set_high();
 
     let spi_cfg = SpiConfig {
         mode: embedded_hal::spi::Mode {
@@ -106,7 +105,7 @@ fn main() -> ! {
         ..Default::default()
     };
 
-    let spi = Spi::new(dp.SPI1, spi_cfg, BaudRate::Div256);
+    let spi = Spi::new(dp.SPI1, spi_cfg, BaudRate::Div4);
 
     defmt::debug!("SPI configured!");
 
@@ -114,16 +113,21 @@ fn main() -> ! {
 
     defmt::debug!("SPI interface display driver init...");
 
-    let mut display_driver = Gc9a01::new(
+    let mut display_driver: Gc9a01<
+        SPIInterface<Spi<pac::SPI1>, Pin, Pin>,
+        DisplayResolution240x240,
+        BufferedGraphics<DisplayResolution240x240>,
+    > = Gc9a01::new(
         interface,
         DisplayResolution240x240,
         DisplayRotation::Rotate0,
     )
     .into_buffered_graphics();
+    display_driver.reset(&mut reset, &mut delay).ok();
     display_driver.init().ok();
     defmt::debug!("Driver configured!");
 
-    let mut tick = 0;
+    let mut tick: u32 = 0;
     loop {
         display_driver.clear();
         draw(&mut display_driver, tick);

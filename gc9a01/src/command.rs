@@ -673,13 +673,20 @@ pub enum Command {
     SetUndocumented0FFh,
 
     ///Set SUndocumented 011h (0x11h)
+    // TODO: Sleep Out
     SetUndocumented011h,
 
-    ///Set SUndocumented 021h (0x21h)
+    /// Set SUndocumented 021h (0x21h)
     SetUndocumented021h,
 
     ///Set SUndocumented 029h (0x29h)
     SetUndocumented029h,
+
+    // TODO: Documentation
+    MemoryWrite,
+
+    // TODO: Documentation
+    MemoryWriteContinue,
 }
 
 // 6.2.23. Write Memory Contiue (3Ch)
@@ -723,10 +730,10 @@ impl Command {
             Command::ColumnAddressSet(sc, ec) => (
                 [
                     0x2A,
+                    (sc >> 8) as u8,
                     (sc & 0xFF) as u8,
-                    ((sc >> 8) & 0xFF) as u8,
+                    (ec >> 8) as u8,
                     (ec & 0xFF) as u8,
-                    ((ec >> 8) & 0xFF) as u8,
                     0,
                     0,
                     0,
@@ -741,10 +748,10 @@ impl Command {
             Command::RowAddressSet(sp, ep) => (
                 [
                     0x2B,
+                    (sp >> 8) as u8,
                     (sp & 0xFF) as u8,
-                    ((sp >> 8) & 0xFF) as u8,
+                    (ep >> 8) as u8,
                     (ep & 0xFF) as u8,
-                    ((ep >> 8) & 0xFF) as u8,
                     0,
                     0,
                     0,
@@ -759,10 +766,10 @@ impl Command {
             Command::VertialScrollDef(tfa, vsa) => (
                 [
                     0x33,
+                    (tfa >> 8) as u8,
                     (tfa & 0xFF) as u8,
-                    ((tfa >> 8) & 0xFF) as u8,
+                    (vsa >> 8) as u8,
                     (vsa & 0xFF) as u8,
-                    ((vsa >> 8) & 0xFF) as u8,
                     0,
                     0,
                     0,
@@ -780,8 +787,8 @@ impl Command {
             Command::VerticalScrollStartAddresss(vsp) => (
                 [
                     0x37,
+                    (vsp >> 8) as u8,
                     (vsp & 0xFF) as u8,
-                    ((vsp >> 8) & 0xFF) as u8,
                     0,
                     0,
                     0,
@@ -817,8 +824,8 @@ impl Command {
             Command::SetTearScanline(sts) => (
                 [
                     0x44,
-                    ((sts + 8) & 0xFF) as u8,
                     (((sts + 8) & 0x100) >> 8) as u8,
+                    ((sts + 8) & 0xFF) as u8,
                     0,
                     0,
                     0,
@@ -1125,6 +1132,8 @@ impl Command {
                 ],
                 7,
             ),
+            Command::MemoryWrite => ([0x2c, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], 1),
+            Command::MemoryWriteContinue => ([0x3c, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], 1),
             Command::SetUndocumented011h => ([0x11, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], 1),
             Command::SetUndocumented021h => ([0x21, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], 1),
             Command::SetUndocumented029h => ([0x29, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], 1),
@@ -1253,7 +1262,11 @@ impl Command {
         };
 
         // Send command over the interface
-        iface.send_commands(U8(&data[0..len]))
+        iface.send_commands(U8(&[data[0]]))?;
+        if len > 1 {
+            iface.send_data(U8(&data[1..len]))?;
+        }
+        Ok(())
     }
 }
 
