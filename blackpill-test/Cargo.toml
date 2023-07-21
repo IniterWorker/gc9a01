@@ -15,7 +15,7 @@ cortex-m-rt = "0.7.2"
 stm32-hal2 = { version = "^1.6.3", features = ["f411", "f4rt", "embedded_hal"]}
 embedded-hal = { version = "0.2.5" }
 # graphics
-embedded-graphics = "0.7.1"
+embedded-graphics = "0.8.0"
 
 # local libs
 gc9a01-rs = { path = "../gc9a01-rs" }

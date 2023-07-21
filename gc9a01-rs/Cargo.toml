@@ -20,7 +20,7 @@ targets = [ "thumbv7m-none-eabi", "thumbv7em-none-eabihf" ]
 # Embedded HAL abstraction
 # We use this layer to abstract hardware i2c/spi
 embedded-hal = { version = "0.2.5" }
-embedded-graphics-core = { version = "0.3.3", optional = true }
+embedded-graphics-core = { version = "0.4.0", optional = true }
 
 # This Rust crate contains a no_std compatible interface in form of traits
 # to bridge between a bus driver and a display driver.
