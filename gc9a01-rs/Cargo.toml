@@ -9,6 +9,7 @@ description = "SPI 4-wire driver for GC9A01 display controller"
 keywords = ["no-std", "gc9a01", "watch", "display", "embedded", "embedded-hal-driver"]
 include = ["src/**/*.rs", "crates-io.md", "README.md", "LICENSE-APACHE", "LICENSE-MIT"]
 repository = "https://github.com/IniterWorker/gc9a01"
+readme = "README.md"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 

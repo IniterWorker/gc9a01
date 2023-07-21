@@ -20,7 +20,3 @@ embedded-graphics = "0.7.1"
 # local libs
 gc9a01-rs = { path = "../gc9a01-rs" }
 
-[[bin]]
-name = "blackpill_test"
-test = false
-bench = false

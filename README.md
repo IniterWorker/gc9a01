@@ -4,6 +4,12 @@ Rust implementation SPI 4-wire driver for the Gc9a01 display driver
 
 <img src="./images/picture.jpg" alt="Gc9a01-rs" align="center">
 
+## Getting started
+
+```bash
+cargo run --example blackpill_test --release --target thumbv7em-none-eabihf
+```
+
 ## Support
 
 - [Embedded-graphics 2D graphics library](https://github.com/embedded-graphics/embedded-graphics)
@@ -35,6 +41,7 @@ Rust implementation SPI 4-wire driver for the Gc9a01 display driver
 - [x] Implement buffered context
 - [x] Implement embedded-graphics
 - [ ] Rust Documentation
+- [ ] Rust Cargo Deploy
 
 ## Inspiration
 
