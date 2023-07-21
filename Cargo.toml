@@ -2,7 +2,7 @@
 
 members = [
     "blackpill-test",
-    "gc9a01",
+    "gc9a01-rs",
 ]
 
 # cargo build/run

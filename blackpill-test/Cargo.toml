@@ -4,6 +4,7 @@ edition = "2021"
 readme = "README.md"
 name = "blackpill-test"
 version = "0.1.0"
+publish = false
 
 [dependencies]
 defmt = "=0.3.2"
@@ -17,7 +18,7 @@ embedded-hal = { version = "0.2.5" }
 embedded-graphics = "0.7.1"
 
 # local libs
-bwit-gc9a01 = { path = "../gc9a01" }
+gc9a01-rs = { path = "../gc9a01-rs" }
 
 [[bin]]
 name = "blackpill_test"

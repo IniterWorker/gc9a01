@@ -1,5 +1,5 @@
 [package]
-name = "bwit-gc9a01"
+name = "gc9a01-rs"
 categories = ["embedded", "no-std"]
 version = "0.1.0"
 edition = "2021"

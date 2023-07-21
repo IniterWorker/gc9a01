@@ -1,9 +1,12 @@
-# Gc9a01 driver
+# Gc9a01-rs driver
 
-SPI 4-wire driver for the Gc9a01 display driver
+Rust implementation SPI 4-wire driver for the Gc9a01 display driver
 
 <img src="./images/picture.jpg" alt="Gc9a01-rs" align="center">
 
+## Support
+
+- [Embedded-graphics 2D graphics library](https://github.com/embedded-graphics/embedded-graphics)
 
 ## Playgrounds
 
