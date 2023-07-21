@@ -88,13 +88,16 @@ where
     }
 
     /// Initialise the screen in one of the available addressing modes.
-    pub fn init_with_addr_mode(&mut self) -> Result<(), DisplayError> {
+    pub fn init_with_addr_mode(
+        &mut self,
+        delay: &mut impl DelayMs<u8>,
+    ) -> Result<(), DisplayError> {
         // TODO: implement initialization sequence
 
         let rotation = self.display_rotation;
 
         // Dedicated/Custom implementation override
-        self.display.configure(&mut self.interface)?;
+        self.display.configure(&mut self.interface, delay)?;
 
         // Enforced context parameters
         self.set_display_rotation(rotation)?;
@@ -102,6 +105,7 @@ where
 
         // Command::MemoryAddressingMode(mode).send(&mut self.interface)?;
         Command::DisplayState(Logical::On).send(&mut self.interface)?;
+        delay.delay_ms(120);
 
         Ok(())
     }

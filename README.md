@@ -2,9 +2,8 @@
 
 SPI 4-wire driver for the Gc9a01 display driver
 
-**NOTE:** WIP: feel free to open an issue
+<img src="./images/picture.jpg" alt="Gc9a01-rs" align="center">
 
-----
 
 ## Playgrounds
 
@@ -24,11 +23,11 @@ SPI 4-wire driver for the Gc9a01 display driver
   - [x] SPI Setup
 - [x] Buy the hardware
   - [x] Delivery expected by 13 Dec 2022
-- [ ] Implement write-only cmds
+- [x] Implement write-only cmds
   - [x] Write-only operation
   - [x] Implement a working display init
-  - [ ] Documentation
-  - [ ] Test
+  - [x] Documentation
+  - [x] Test
 - [ ] Implement display rotation
 - [x] Implement buffered context
 - [x] Implement embedded-graphics

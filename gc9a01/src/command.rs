@@ -9,7 +9,7 @@ pub enum Command {
     ///
     /// This command turns on/off sleep mode.
     ///
-    /// # Description
+    /// ## Description
     ///
     /// This command causes the LCD module to enter the minimum power consumption mode.
     /// In this mode e.g. the DC/DC converter is stopped, Internal oscillator is stopped, and panel scanning is stopped
@@ -33,7 +33,7 @@ pub enum Command {
     ///
     /// This command turns on Partial mode.
     ///
-    /// # Description
+    /// ## Description
     ///
     /// This command turns on partial mode. The Partial mode window is described by the Partial
     /// Area command (30h). To leave Partial mode, the Normal Display Mode On command (13h) should be written.
@@ -48,7 +48,7 @@ pub enum Command {
     ///
     /// This command turns on Normal Display mode.
     ///
-    /// # Description
+    /// ## Description
     ///
     /// Normal display mode on means Partial mode off.
     /// Exit from NORON by the Partial mode On command (12h)
@@ -63,7 +63,7 @@ pub enum Command {
     ///
     /// This command turns on/off Display Inversion
     ///
-    /// # Description
+    /// ## Description
     ///
     /// This command is used to recover from display inversion mode.
     /// This command makes no change of the content of frame memory.
@@ -79,7 +79,7 @@ pub enum Command {
     ///
     /// This command turns on/off Display
     ///
-    /// # Description
+    /// ## Description
     ///
     /// In this mode, the output from Frame Memory is disabled and blank page inserted.
     ///
@@ -98,7 +98,7 @@ pub enum Command {
     ///
     /// This command is used to defined area of frame memory where MCU can access.
     ///
-    /// # Description
+    /// ## Description
     ///
     /// This command makes no change on the other driver status.
     /// The values of SC [15:0] and EC [15:0] are referred when RAMWR command comes.
@@ -122,7 +122,7 @@ pub enum Command {
     ///
     /// This command is used to define area of frame memory where MCU can access.
     ///
-    /// # Description
+    /// ## Description
     ///
     /// This command makes no change on the other driver status.
     /// The values of SP [15:0] and EP [15:0] are referred when RAMWR command comes.
@@ -149,7 +149,7 @@ pub enum Command {
     ///
     /// This command is used to define area of frame memory where MCU can access.
     ///
-    /// # Description
+    /// ## Description
     ///
     /// This command defines the Vertical Scrolling Area of the display.
     ///
@@ -183,7 +183,7 @@ pub enum Command {
     ///
     /// * M `.0` => Mode (Logical)
     ///
-    /// # Description
+    /// ## Description
     ///
     /// This command is used to turn ON the Tearing Effect output signal from the TE signal line.
     /// This output is not affected by changing MADCTL bit B4. The Tearing Effect Line On has one parameter which describes
@@ -213,7 +213,7 @@ pub enum Command {
     /// * Color selector switch control (0=RGB color filter panel, 1=BGR color filter panel)
     /// * MH Horizontal Refresh ORDER LCD horizontal refreshing direction control.
     ///
-    /// # Description
+    /// ## Description
     ///
     /// Note: When BGR bit is changed, the new setting is active immediately without update the content in
     /// Frame Memory again.
@@ -229,7 +229,7 @@ pub enum Command {
     /// ## Parameters
     /// * VSP `.0` => Vertical Start Page
     ///
-    /// # Description
+    /// ## Description
     ///
     /// This command is used together with Vertical Scrolling Definition (33h). These two commands
     /// describe the scrolling area and the scrolling mode.
@@ -251,7 +251,7 @@ pub enum Command {
     /// ## Parameters
     /// * State `.0` => On/Off
     ///
-    /// # Description
+    /// ## Description
     ///
     /// In the idle off mode, LCD can display maximum 262,144 colors.
     ///
@@ -267,7 +267,7 @@ pub enum Command {
     /// * DBI `.0` => MCU Interface Format
     /// * DPI `.1` => RGB Interface Format
     ///
-    /// # Description
+    /// ## Description
     ///
     /// This command sets the pixel format for the RGB image data used by the interface. DPI [2:0] is
     /// the pixel format select of RGB interface and DBI [2:0] is the pixel format of MCU interface. If
@@ -284,7 +284,7 @@ pub enum Command {
     /// ## Parameters
     /// * STS => Set Tear Scanline 0-239
     ///
-    /// # Description
+    /// ## Description
     ///
     /// This command turns on the display Tearing Effect output signal on the TE signal line when the
     /// display reaches line equal the value of STS[8:0].
@@ -300,7 +300,7 @@ pub enum Command {
     ///
     /// * DBV `.0` =>
     ///
-    /// # Description
+    /// ## Description
     ///
     /// It should be checked what is the relationship between this written value and output brightness of the display.
     /// This relationship between this written value and output brightness of the display. This relationship is defined on the display module specification.
@@ -352,7 +352,7 @@ pub enum Command {
     /// * VBP `.1` => The line number of Vertical Back Porch
     /// * HBP `.2` => The line number of Horizontal Back Porch
     ///
-    /// # Description
+    /// ## Description
     ///
     /// __NOTE__: The Third parameter must write,but it is not valid
     ///
@@ -423,7 +423,7 @@ pub enum Command {
     ///
     /// * vreg1_vbp_d `.0` => TODO
     ///
-    /// # Description
+    /// ## Description
     ///
     /// Set the voltage level value to output the VREG1A and VREG1B OUT level, which is a
     /// reference level for the grayscale voltage level.(Table is valid when vrh=0x28)
@@ -438,7 +438,7 @@ pub enum Command {
     ///
     /// * vreg1_vbn_d `.0` => TODO
     ///
-    /// # Description
+    /// ## Description
     ///
     /// Set the voltage level value to output the VREG2A OUT level, which is a reference level for
     /// the grayscale voltage level(Table is valid when vrh=0x28)
@@ -453,7 +453,7 @@ pub enum Command {
     ///
     /// * vrh `.0` => TODO
     ///
-    /// # Description
+    /// ## Description
     ///
     /// Set the voltage level value to output the VREG1A OUT level, which is a reference level for
     /// the grayscale voltage level. (Table is valid when vbp_d=0x3C and vbn_d=0x3C)
@@ -499,7 +499,7 @@ pub enum Command {
 
     /// Inner Register Enable 1 (FEh)
     ///
-    /// # Description
+    /// ## Description
     ///
     /// This command is used for Inter_command controlling.
     /// To set Inter_command high ,you should write Inter register enable 1 (FEh) and Inter register
@@ -510,7 +510,7 @@ pub enum Command {
 
     /// Inner Register Enable 2 (EFh)
     ///
-    /// # Description
+    /// ## Description
     ///
     /// This command is used for Inter_command controlling.
     /// To set Inter_command high ,you should write Inter register enable 1 (FEh) and Inter register
@@ -672,34 +672,64 @@ pub enum Command {
     ///Set SUndocumented 0FFh (0xFFh)
     SetUndocumented0FFh,
 
-    ///Set SUndocumented 011h (0x11h)
-    // TODO: Sleep Out
-    SetUndocumented011h,
-
-    /// Set SUndocumented 021h (0x21h)
-    SetUndocumented021h,
-
-    ///Set SUndocumented 029h (0x29h)
-    SetUndocumented029h,
-
-    // TODO: Documentation
+    /// Memory Write (F2Ch)
+    ///
+    /// ## Description
+    ///
+    /// change to the other driver
+    /// status. When this command is accepted, the column register and the page register are reset to
+    /// the Start Column/Start
+    /// Page positions. The Start Column/Start Page positions are different in accordance with
+    /// MADCTL setting.) Then D [17:0] isstored in frame memory and the column register and the
+    /// page register incremented. Sending any other command can stop frame Write. X = Don’t care
+    ///
+    /// ## Restriction
+    ///
+    /// In all color modes, there is no restriction on length of parameters.
+    ///
+    ///
     MemoryWrite,
 
-    // TODO: Documentation
+    /// Write Memory Contiue (3Ch)
+    ///
+    /// ## Description
+    ///
+    /// This command transfers image data from the host processor to the display module’s frame
+    /// memory continuing from the pixel location following the previous write_memory_continue or write_memory_start
+    /// command.
+    ///
+    /// ### If set_address_mode B5 = 0:
+    /// Data is written continuing from the pixel location after the write range of the previous
+    /// write_memory_start or write_memory_continue. The column register is then incremented and pixels are written to the
+    /// frame memory until the column register equals the End Column (EC) value. The column register is then reset to SC and the page register is
+    /// incremented. Pixels are written to the frame memory until the page register equals the End Page
+    /// (EP) value and the column register equals the EC value, or the host processor sends another command. If the
+    /// number of pixels exceeds (EC –SC + 1) * (EP – SP + 1) the extra pixels are ignored.
+    ///
+    /// ### If set_address_mode B5 = 1:
+    /// Data is written continuing from the pixel location after the write range of the previous
+    /// write_memory_start or write_memory_continue. The page register is then incremented and pixels are written to the
+    /// frame memory until the page register equals the End Page (EP) value. The page register is then
+    /// reset to SP and the column register is incremented. Pixels are written to the frame memory until
+    /// the column register equals the End column (EC) value and the page register equals the EP value,
+    /// or the host processor sends another command. If the number of pixels exceeds (EC – SC + 1) *
+    /// (EP –SP + 1) the extra pixels are ignored.
+    /// Sending any other command can stop frame Write.
+    /// Frame Memory Access and Interface setting (B3h), WEMODE=0
+    /// When the transfer number of data exceeds (EC-SC+1)*(EP-SP+1), the exceeding data will be ignored.
+    /// Frame Memory Access and Interface setting (B3h), WEMODE=1
+    ///
+    /// When the transfer number of data exceeds (EC-SC+1)*(EP-SP+1), the column and page number
+    /// will be reset, and the
+    /// exceeding data will be written into the following column and page
+    ///
+    /// ## Restriction
+    ///
+    /// A write_memory_start should follow a set_column_address, set_page_address or
+    /// set_address_mode to define the write
+    /// address. Otherwise, data written with write_memory_continue is written to undefined addresses
     MemoryWriteContinue,
 }
-
-// 6.2.23. Write Memory Contiue (3Ch)
-// A write_memory_start should follow a set_column_address, set_page_address or
-// set_address_mode to define the write
-// address. Otherwise, data written with write_memory_continue is written to undefined addresses
-
-// Every pixel (18-bit) data in GRAM is located by a (Page, Column) address (Y, X). By specifying the arbitrary
-// window address SC, EC bits and SP, EP bits, it is possible to access the GRAM by setting RAMWR or
-// RAMRD commands from start positions of the window address.
-// (00,00)h and max (EF, 13F)h
-// 1,382,400 bits (320x18x240 bits)
-// One pixel unit represents 1 column
 
 impl Command {
     /// Send command to SSD1306
@@ -716,13 +746,31 @@ impl Command {
         // Array Size 5
         // Transform everything in 10 bytes array
         let (data, len): ([u8; 13], usize) = match self {
-            Command::SleepMode(level) => {
-                ([0x10 | level as u8, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], 1)
-            }
+            Command::SleepMode(level) => (
+                [
+                    match level {
+                        Logical::Off => 0x11,
+                        Logical::On => 0x10,
+                    },
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                ],
+                1,
+            ),
             Command::PartialMode => ([0x12, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], 1),
             Command::NormalDisplayMode => ([0x13, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], 1),
             Command::DisplayInversion(level) => {
-                ([0x20 | level as u8, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], 2)
+                ([0x20 | level as u8, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], 1)
             }
             Command::DisplayState(level) => {
                 ([0x28 | level as u8, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], 1)
@@ -901,9 +949,9 @@ impl Command {
             Command::DispalyFunctionControl(gs, ss, sm, nl) => (
                 [
                     0xB6,
-                    0,
                     ((gs as u8 & 0b1) << 6) | ((ss as u8 & 0b1) << 5) | ((sm & 0b1) << 4),
                     nl & 0b0001_1111,
+                    0,
                     0,
                     0,
                     0,
@@ -1134,9 +1182,6 @@ impl Command {
             ),
             Command::MemoryWrite => ([0x2c, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], 1),
             Command::MemoryWriteContinue => ([0x3c, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], 1),
-            Command::SetUndocumented011h => ([0x11, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], 1),
-            Command::SetUndocumented021h => ([0x21, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], 1),
-            Command::SetUndocumented029h => ([0x29, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], 1),
             Command::SetUndocumented0BEh => ([0xBE, 0x11, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], 2),
             Command::SetUndocumented0BCh => ([0xBC, 0x00, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], 2),
             Command::SetUndocumented0BDh => ([0xBD, 0x06, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], 2),
@@ -1262,6 +1307,7 @@ impl Command {
         };
 
         // Send command over the interface
+        // TODO: do something better
         iface.send_commands(U8(&[data[0]]))?;
         if len > 1 {
             iface.send_data(U8(&data[1..len]))?;

@@ -7,8 +7,8 @@ use gc9a01::{mode::BufferedGraphics, prelude::*, Gc9a01, SPIDisplayInterface};
 
 use embedded_graphics::{
     pixelcolor::Rgb565,
-    prelude::{Point, RgbColor},
-    primitives::{Circle, Primitive, PrimitiveStyleBuilder},
+    prelude::{Point, RgbColor, Size},
+    primitives::{Circle, Primitive, PrimitiveStyleBuilder, Rectangle},
     Drawable,
 };
 use stm32_hal2::{
@@ -37,15 +37,40 @@ fn draw<I: WriteOnlyDataCommand, D: DisplayDefinition>(
 
     let style = PrimitiveStyleBuilder::new()
         .stroke_width(4)
-        .stroke_color(Rgb565::BLUE)
+        .stroke_color(Rgb565::new(tick as u8, x as u8, y as u8))
         .fill_color(Rgb565::RED)
         .build();
 
+    let cdiameter = 20;
+
     // circle
-    Circle::new(Point::new(x as i32, y as i32), 200)
-        .into_styled(style)
-        .draw(display)
-        .unwrap();
+    Circle::new(
+        Point::new(119 - cdiameter / 2 + 40, 119 - cdiameter / 2 + 40),
+        cdiameter as u32,
+    )
+    .into_styled(style)
+    .draw(display)
+    .unwrap();
+
+    // circle
+    Circle::new(
+        Point::new(119 - cdiameter / 2 - 40, 119 - cdiameter / 2 + 40),
+        cdiameter as u32,
+    )
+    .into_styled(style)
+    .draw(display)
+    .unwrap();
+
+    // rectangle
+    let rw = 80;
+    let rh = 20;
+    Rectangle::new(
+        Point::new(119 - rw / 2, 119 - rh / 2 - 40),
+        Size::new(rw as u32, rh as u32),
+    )
+    .into_styled(style)
+    .draw(display)
+    .unwrap();
 }
 
 #[entry]
@@ -124,7 +149,7 @@ fn main() -> ! {
     )
     .into_buffered_graphics();
     display_driver.reset(&mut reset, &mut delay).ok();
-    display_driver.init().ok();
+    display_driver.init(&mut delay).ok();
     defmt::debug!("Driver configured!");
 
     let mut tick: u32 = 0;

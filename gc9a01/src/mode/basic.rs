@@ -1,6 +1,7 @@
 //! Buffered Graphic Implementation
 
 use display_interface::{DisplayError, WriteOnlyDataCommand};
+use embedded_hal::blocking::delay::DelayMs;
 
 use crate::{display::DisplayDefinition, rotation::DisplayRotation, Gc9a01};
 
@@ -34,10 +35,11 @@ where
     }
 }
 
-impl<I, D> DisplayConfiguration for Gc9a01<I, D, BasicMode>
+impl<I, D, DELAY> DisplayConfiguration<DELAY> for Gc9a01<I, D, BasicMode>
 where
     I: WriteOnlyDataCommand,
     D: DisplayDefinition,
+    DELAY: DelayMs<u8>,
 {
     type Error = DisplayError;
 
@@ -47,7 +49,7 @@ where
     }
 
     /// Initialise and clear the display in graphics mode.
-    fn init(&mut self) -> Result<(), DisplayError> {
-        self.init_with_addr_mode()
+    fn init(&mut self, delay: &mut DELAY) -> Result<(), DisplayError> {
+        self.init_with_addr_mode(delay)
     }
 }
