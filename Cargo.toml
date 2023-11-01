@@ -2,6 +2,7 @@
 
 members = [
     "blackpill-test",
+    "esp32-test",
     "gc9a01-rs",
 ]
 
