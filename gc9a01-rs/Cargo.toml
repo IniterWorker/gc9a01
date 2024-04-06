@@ -3,7 +3,9 @@ name = "gc9a01-rs"
 categories = ["embedded", "no-std"]
 version = "0.1.0"
 edition = "2021"
-authors = ["Walter Bonetti <walter.bonetti@epitech.eu>"]
+authors = [
+    "Walter Bonetti <walter.bonetti@epitech.eu>"
+]
 license = "MIT OR Apache-2.0"
 description = "SPI 4-wire driver for GC9A01 display controller"
 keywords = ["no-std", "gc9a01", "display", "embedded", "embedded-hal-driver"]

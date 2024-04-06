@@ -1,5 +1,7 @@
 [package]
-authors = ["Walter Bonetti <bonettiw@amotus.ca>"]
+authors = [
+    "Walter Bonetti <walter.bonetti@epitech.eu>"
+]
 edition = "2021"
 readme = "README.md"
 name = "blackpill-test"
