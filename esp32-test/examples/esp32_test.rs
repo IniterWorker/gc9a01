@@ -7,21 +7,14 @@ use embedded_graphics::{
     primitives::{Circle, Primitive, PrimitiveStyleBuilder, Rectangle},
     Drawable,
 };
-use embedded_hal::blocking::delay;
 use esp_backtrace as _;
-use esp_println::println;
-use gc9a01::{
-    mode::{BasicMode, BufferedGraphics},
-    prelude::*,
-    Gc9a01, SPIDisplayInterface,
-};
+use gc9a01::{mode::BufferedGraphics, prelude::*, Gc9a01, SPIDisplayInterface};
 use hal::{
     clock::ClockControl,
-    gpio::GpioPin,
-    peripherals::{Peripherals, GPIO},
+    peripherals::Peripherals,
     prelude::*,
     spi::master::Spi,
-    spi::{self, FullDuplexMode},
+    spi::{self},
     timer::TimerGroup,
     Delay, Rtc, IO,
 };
@@ -78,7 +71,7 @@ fn draw<I: WriteOnlyDataCommand, D: DisplayDefinition>(
 #[entry]
 fn main() -> ! {
     let peripherals = Peripherals::take();
-    let mut system = peripherals.SYSTEM.split();
+    let system = peripherals.SYSTEM.split();
     let mut clocks = ClockControl::max(system.clock_control).freeze();
     let mut delay = Delay::new(&clocks);
 
@@ -115,7 +108,6 @@ fn main() -> ! {
         spi::SpiMode::Mode0,
         &mut clocks,
     );
-
 
     let interface = SPIDisplayInterface::new(spi, dc_output, cs_output);
 
