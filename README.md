@@ -6,11 +6,8 @@ Rust implementation SPI 4-wire driver for the Gc9a01 display driver
 
 ## Getting started
 
-```bash
-rustup target add thumbv7em-none-eabihf # setup toolchain
-cargo install probe-rs --features cli # setup probe run
-cargo run --example blackpill_test --release --target thumbv7em-none-eabihf
-```
+- [ESP32 Example](./esp32-test/README.md)
+- [STM32 Blackpill Example](./blackpill-test/README.md)
 
 ## Support
 
