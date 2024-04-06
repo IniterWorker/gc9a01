@@ -8,6 +8,12 @@
 rustup target add thumbv7em-none-eabihf
 ```
 
+### Tool
+
+```bash
+cargo install probe-rs --features cli
+```
+
 ### Run under release
 
 ```
