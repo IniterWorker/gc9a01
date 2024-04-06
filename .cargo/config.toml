@@ -1,7 +1,7 @@
 [target.thumbv7em-none-eabihf]
 # uncomment this to make `cargo run` execute programs on QEMU
 # runner = "qemu-system-arm -cpu cortex-m3 -machine lm3s6965evb -nographic -semihosting-config enable=on,target=native -kernel"
-runner = 'probe-run --chip STM32F411CEUx'
+runner = 'probe-rs run --chip STM32F411CEUx'
 
 [target.xtensa-esp32-none-elf]
 runner = "espflash flash --monitor"
