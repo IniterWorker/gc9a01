@@ -1,15 +1,11 @@
 on:
-  push:
-    # Pattern matched against refs/tags
-    tags:        
-      - '*'           # Push events to every tag not containing /
-  workflow_dispatch:
+  pull_request:
 
-name: Rust Release
+name: Rust
 
 jobs:
-  publish:
-    name: Publish
+  build:
+    name: Build Driver
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -34,7 +30,3 @@ jobs:
 
       - name: Run Tests
         run: cargo test --verbose
-
-      - run: cargo publish --token ${CRATES_TOKEN}
-        env:
-          CRATES_TOKEN: ${{ secrets.CRATES_TOKEN }}
