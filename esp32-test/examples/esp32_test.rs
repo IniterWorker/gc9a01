@@ -72,11 +72,11 @@ fn draw<I: WriteOnlyDataCommand, D: DisplayDefinition>(
 fn main() -> ! {
     let peripherals = Peripherals::take();
     let system = peripherals.SYSTEM.split();
-    let mut clocks = ClockControl::max(system.clock_control).freeze();
+    let clocks = ClockControl::max(system.clock_control).freeze();
     let mut delay = Delay::new(&clocks);
 
     // Disable the RTC and TIMG watchdog timers
-    let mut rtc = Rtc::new(peripherals.RTC_CNTL);
+    let mut rtc = Rtc::new(peripherals.LPWR);
     let timer_group0 = TimerGroup::new(peripherals.TIMG0, &clocks);
     let mut wdt0 = timer_group0.wdt;
     let timer_group1 = TimerGroup::new(peripherals.TIMG1, &clocks);
@@ -88,26 +88,17 @@ fn main() -> ! {
 
     let io = IO::new(peripherals.GPIO, peripherals.IO_MUX);
 
-    #[allow(unused_variables)]
     let sck = io.pins.gpio18;
-    #[allow(unused_variables)]
     let mosi = io.pins.gpio23;
-    #[allow(unused_variables, unused_mut)]
-    let mut cs = io.pins.gpio4;
-    #[allow(unused_variables, unused_mut)]
-    let mut dc = io.pins.gpio2;
+    let cs = io.pins.gpio4;
+    let dc = io.pins.gpio2;
 
     let cs_output = cs.into_push_pull_output();
     let dc_output = dc.into_push_pull_output();
 
-    let spi = Spi::new_no_cs_no_miso(
-        peripherals.SPI3,
-        sck,
-        mosi,
-        40u32.MHz(),
-        spi::SpiMode::Mode0,
-        &mut clocks,
-    );
+    let spi = Spi::new(peripherals.SPI3, 40u32.MHz(), spi::SpiMode::Mode0, &clocks)
+        .with_sck(sck)
+        .with_mosi(mosi);
 
     let interface = SPIDisplayInterface::new(spi, dc_output, cs_output);
 
