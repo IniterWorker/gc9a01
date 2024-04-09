@@ -8,7 +8,7 @@ Rust implementation SPI 4-wire driver for the Gc9a01 display driver
 
 - [ESP32 Example](./esp32-test/README.md)
 - [STM32 Blackpill Example](./blackpill-test/README.md)
-- [Driver GC9A01](./gc9a01/README.md)
+- [Driver GC9A01](./gc9a01-rs/README.md)
 
 ## Support
 
