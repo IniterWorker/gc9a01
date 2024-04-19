@@ -5,11 +5,11 @@ mod graphics;
 pub use graphics::*;
 
 use crate::rotation::DisplayRotation;
-use embedded_hal::blocking::delay::DelayMs;
+use embedded_hal::delay::DelayNs;
 
 pub trait DisplayConfiguration<DELAY>
 where
-    DELAY: DelayMs<u8>,
+    DELAY: DelayNs,
 {
     type Error;
 

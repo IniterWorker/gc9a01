@@ -1,7 +1,7 @@
 //! Buffered Graphic Implementation
 
 use display_interface::{DisplayError, WriteOnlyDataCommand};
-use embedded_hal::blocking::delay::DelayMs;
+use embedded_hal::delay::DelayNs;
 
 use crate::{display::DisplayDefinition, rotation::DisplayRotation, Gc9a01};
 
@@ -39,7 +39,7 @@ impl<I, D, DELAY> DisplayConfiguration<DELAY> for Gc9a01<I, D, BasicMode>
 where
     I: WriteOnlyDataCommand,
     D: DisplayDefinition,
-    DELAY: DelayMs<u8>,
+    DELAY: DelayNs,
 {
     type Error = DisplayError;
 

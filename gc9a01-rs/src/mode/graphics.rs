@@ -2,7 +2,7 @@
 
 use display_interface::{DisplayError, WriteOnlyDataCommand};
 use embedded_graphics_core::{pixelcolor::raw::RawU16, prelude::RawData};
-use embedded_hal::blocking::delay::DelayMs;
+use embedded_hal::delay::DelayNs;
 
 use crate::{
     display::{DisplayDefinition, NewZeroed},
@@ -48,7 +48,7 @@ impl<I, D, DELAY> DisplayConfiguration<DELAY> for Gc9a01<I, D, BufferedGraphics<
 where
     I: WriteOnlyDataCommand,
     D: DisplayDefinition,
-    DELAY: DelayMs<u8>,
+    DELAY: DelayNs,
 {
     type Error = DisplayError;
 

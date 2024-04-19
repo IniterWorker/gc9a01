@@ -5,8 +5,8 @@ use super::mode::{BasicMode, BufferedGraphics};
 use super::rotation::DisplayRotation;
 
 use display_interface::{DataFormat, DisplayError, WriteOnlyDataCommand};
-use embedded_hal::blocking::delay::DelayMs;
-use embedded_hal::digital::v2::OutputPin;
+use embedded_hal::delay::DelayNs;
+use embedded_hal::digital::OutputPin;
 
 /// Gc9a01 Driver
 pub struct Gc9a01<I, D, M>
@@ -29,12 +29,12 @@ where
     pub fn reset<RST, DELAY>(&mut self, rst: &mut RST, delay: &mut DELAY) -> Result<(), RST::Error>
     where
         RST: OutputPin,
-        DELAY: DelayMs<u8>,
+        DELAY: DelayNs,
     {
         fn inner_reset<RST, DELAY>(rst: &mut RST, delay: &mut DELAY) -> Result<(), RST::Error>
         where
             RST: OutputPin,
-            DELAY: DelayMs<u8>,
+            DELAY: DelayNs,
         {
             rst.set_high()?;
             delay.delay_ms(50);
@@ -90,7 +90,7 @@ where
     /// Initialise the screen in one of the available addressing modes.
     pub fn init_with_addr_mode(
         &mut self,
-        delay: &mut impl DelayMs<u8>,
+        delay: &mut impl DelayNs,
     ) -> Result<(), DisplayError> {
         // TODO: implement initialization sequence
 

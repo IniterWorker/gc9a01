@@ -3,7 +3,7 @@
 //! Reference all screen hardware definition
 
 use display_interface::{DisplayError, WriteOnlyDataCommand};
-use embedded_hal::blocking::delay::DelayMs;
+use embedded_hal::delay::DelayNs;
 
 use crate::command::{
     Command, DINVMode, Dbi, Dpi, GSMode, Gamma1, Gamma2, Gamma3, Gamma4, Logical, SSMode,
@@ -38,7 +38,7 @@ pub trait DisplayDefinition {
     fn configure(
         &self,
         iface: &mut impl WriteOnlyDataCommand,
-        delay: &mut impl DelayMs<u8>,
+        delay: &mut impl DelayNs,
     ) -> Result<(), DisplayError>;
 }
 
@@ -56,7 +56,7 @@ impl DisplayDefinition for DisplayResolution240x240 {
     fn configure(
         &self,
         iface: &mut impl WriteOnlyDataCommand,
-        delay: &mut impl DelayMs<u8>,
+        delay: &mut impl DelayNs,
     ) -> Result<(), DisplayError> {
         Command::InnerRegisterEnable1.send(iface)?;
         Command::InnerRegisterEnable2.send(iface)?;

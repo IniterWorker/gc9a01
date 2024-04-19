@@ -1,7 +1,7 @@
 //! Crate prelude
 
 pub use display_interface::WriteOnlyDataCommand;
-pub use display_interface_spi::{SPIInterface, SPIInterfaceNoCS};
+pub use display_interface_spi::{SPIInterface};
 
 pub use super::{
     brightness::Brightness,
