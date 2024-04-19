@@ -7,9 +7,6 @@ jobs:
   build:
     name: Build Driver
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: ./gc9a01-rs
 
     steps:
       - name: Checkout sources

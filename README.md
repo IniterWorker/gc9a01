@@ -4,15 +4,13 @@ Rust implementation SPI 4-wire driver for the Gc9a01 display driver
 
 <img src="./images/picture.jpg" alt="Gc9a01-rs" align="center">
 
-## Getting started
-
-- [ESP32 Example](./esp32-test/README.md)
-- [STM32 Blackpill Example](./blackpill-test/README.md)
-- [Driver GC9A01](./gc9a01-rs/README.md)
-
 ## Support
 
 - [Embedded-graphics 2D graphics library](https://github.com/embedded-graphics/embedded-graphics)
+
+## Drivers
+
+- [gc9a01](./gc9a01)
 
 ## Hardware
 
