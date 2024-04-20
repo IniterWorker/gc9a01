@@ -1,16 +1,14 @@
 # Gc9a01-rs driver
 
-Rust implementation SPI 4-wire driver for the Gc9a01 display driver
+Rust implementation SPI 4-wire driver for the Gc9a01 display driver with a generic interface for display drivers and embedded-hal v1.0.0 support.
 
 <img src="./images/picture.jpg" alt="Gc9a01-rs" align="center">
 
 ## Support
 
 - [Embedded-graphics 2D graphics library](https://github.com/embedded-graphics/embedded-graphics)
-
-## Drivers
-
-- [gc9a01](./gc9a01)
+- [Generic Interface for Display Drivers](https://github.com/therealprof/display-interface)
+- [Embedded-hal v1.0.0](https://github.com/rust-embedded/embedded-hal/tree/embedded-hal-v1.0.0)
 
 ## Hardware
 
