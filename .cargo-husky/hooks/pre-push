@@ -1,0 +1,6 @@
+set -e
+
+echo '+cargo clippy --all-targets --all-features --workspace -- -D warnings'
+cargo clippy --all-targets --all-features --workspace -- -D warnings
+echo '+cargo fmt ---all -- --check --color always'
+cargo fmt --all -- --check --color always
