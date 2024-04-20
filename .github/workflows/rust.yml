@@ -1,12 +1,28 @@
-on:
-  pull_request:
+name: Continuous Integration
 
-name: Rust
+on:
+  push:
+    paths-ignore:
+      - "**/README.md"
+  pull_request:
+  workflow_dispatch:
 
 jobs:
   build:
     name: Build Driver
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        action:
+          - command: build
+            args: --release
+          - command: fmt
+            args: --all -- --check --color always
+          - command: clippy
+            args: --all-targets --all-features --workspace -- -D warnings
+          - command: test
+            args: --verbose
 
     steps:
       - name: Checkout sources
@@ -19,11 +35,9 @@ jobs:
           components: clippy, rustfmt
           targets: thumbv7em-none-eabihf
 
-      - name: Build
-        run: cargo build --all-targets --verbose
+      - name: Enable caching
+        uses: Swatinem/rust-cache@v2
 
-      - name: Lint with Clippy
-        run: cargo clippy --all-targets --all-features -- -D warnings
+      - name: Run command
+        run: cargo ${{ matrix.action.command }} ${{ matrix.action.args }}
 
-      - name: Run Tests
-        run: cargo test --verbose

@@ -9,6 +9,7 @@ Rust implementation SPI 4-wire driver for the [`Gc9a01`](https://crates.io/crate
 ### Added
 
 - Add `cargo-husky` user hooks.
+- Add `cargo fmt` inside the workflow.
 
 ## [0.2.0] - 2024-04-19
 
