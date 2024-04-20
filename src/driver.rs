@@ -88,10 +88,7 @@ where
     }
 
     /// Initialise the screen in one of the available addressing modes.
-    pub fn init_with_addr_mode(
-        &mut self,
-        delay: &mut impl DelayNs,
-    ) -> Result<(), DisplayError> {
+    pub fn init_with_addr_mode(&mut self, delay: &mut impl DelayNs) -> Result<(), DisplayError> {
         // TODO: implement initialization sequence
 
         let rotation = self.display_rotation;
