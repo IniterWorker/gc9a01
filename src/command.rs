@@ -1,3 +1,4 @@
+#![allow(clippy::match_same_arms)]
 //! Commands
 
 use display_interface::{DataFormat::U8, DisplayError, WriteOnlyDataCommand};
@@ -733,6 +734,11 @@ pub enum Command {
 
 impl Command {
     /// Send command to SSD1306
+    ///
+    /// # Errors
+    ///
+    /// This method may return an error if there are communication issues with the display.
+    #[allow(clippy::too_many_lines)]
     pub fn send<DI>(self, iface: &mut DI) -> Result<(), DisplayError>
     where
         DI: WriteOnlyDataCommand,
@@ -746,7 +752,7 @@ impl Command {
         // Array Size 5
         // Transform everything in 10 bytes array
         let (data, len): ([u8; 13], usize) = match self {
-            Command::SleepMode(level) => (
+            Self::SleepMode(level) => (
                 [
                     match level {
                         Logical::Off => 0x11,
@@ -767,15 +773,15 @@ impl Command {
                 ],
                 1,
             ),
-            Command::PartialMode => ([0x12, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], 1),
-            Command::NormalDisplayMode => ([0x13, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], 1),
-            Command::DisplayInversion(level) => {
+            Self::PartialMode => ([0x12, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], 1),
+            Self::NormalDisplayMode => ([0x13, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], 1),
+            Self::DisplayInversion(level) => {
                 ([0x20 | level as u8, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], 1)
             }
-            Command::DisplayState(level) => {
+            Self::DisplayState(level) => {
                 ([0x28 | level as u8, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], 1)
             }
-            Command::ColumnAddressSet(sc, ec) => (
+            Self::ColumnAddressSet(sc, ec) => (
                 [
                     0x2A,
                     (sc >> 8) as u8,
@@ -793,7 +799,7 @@ impl Command {
                 ],
                 5,
             ),
-            Command::RowAddressSet(sp, ep) => (
+            Self::RowAddressSet(sp, ep) => (
                 [
                     0x2B,
                     (sp >> 8) as u8,
@@ -811,7 +817,7 @@ impl Command {
                 ],
                 5,
             ),
-            Command::VertialScrollDef(tfa, vsa) => (
+            Self::VertialScrollDef(tfa, vsa) => (
                 [
                     0x33,
                     (tfa >> 8) as u8,
@@ -829,10 +835,10 @@ impl Command {
                 ],
                 5,
             ),
-            Command::TearingEffectLine(mode) => {
+            Self::TearingEffectLine(mode) => {
                 ([0x34 | mode as u8, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], 1)
             }
-            Command::VerticalScrollStartAddresss(vsp) => (
+            Self::VerticalScrollStartAddresss(vsp) => (
                 [
                     0x37,
                     (vsp >> 8) as u8,
@@ -850,8 +856,8 @@ impl Command {
                 ],
                 3,
             ),
-            Command::IdleMode(mode) => ([0x38 | mode as u8, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], 1),
-            Command::PixelFormatSet(dbi, dpi) => (
+            Self::IdleMode(mode) => ([0x38 | mode as u8, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], 1),
+            Self::PixelFormatSet(dbi, dpi) => (
                 [
                     0x3A,
                     ((dpi as u8) << 4) | (dbi as u8),
@@ -869,7 +875,7 @@ impl Command {
                 ],
                 2,
             ),
-            Command::SetTearScanline(sts) => (
+            Self::SetTearScanline(sts) => (
                 [
                     0x44,
                     (((sts + 8) & 0x100) >> 8) as u8,
@@ -887,8 +893,8 @@ impl Command {
                 ],
                 3,
             ),
-            Command::DisplayBrightness(dbv) => ([0x51, dbv, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], 2),
-            Command::CtrlDisplay(bctrl, dd, bl) => (
+            Self::DisplayBrightness(dbv) => ([0x51, dbv, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], 2),
+            Self::CtrlDisplay(bctrl, dd, bl) => (
                 [
                     0x53,
                     (bctrl as u8) << 5 | (dd as u8) << 3 | (bl as u8) << 2,
@@ -906,7 +912,7 @@ impl Command {
                 ],
                 2,
             ),
-            Command::RGBInterfaceSignalCtrl(epl, dpl, hsp, vsp, rcm) => (
+            Self::RGBInterfaceSignalCtrl(epl, dpl, hsp, vsp, rcm) => (
                 [
                     0xB0,
                     (epl as u8 & 0b1)
@@ -928,7 +934,7 @@ impl Command {
                 ],
                 2,
             ),
-            Command::BlankingPorchControl(vfp, vbp, hbp) => (
+            Self::BlankingPorchControl(vfp, vbp, hbp) => (
                 [
                     0xB5,
                     vfp,
@@ -946,7 +952,7 @@ impl Command {
                 ],
                 4,
             ),
-            Command::DispalyFunctionControl(gs, ss, sm, nl) => (
+            Self::DispalyFunctionControl(gs, ss, sm, nl) => (
                 [
                     0xB6,
                     ((gs as u8 & 0b1) << 6) | ((ss as u8 & 0b1) << 5) | ((sm & 0b1) << 4),
@@ -964,7 +970,7 @@ impl Command {
                 ],
                 3,
             ),
-            Command::TEControl(te_pol, te_width) => (
+            Self::TEControl(te_pol, te_width) => (
                 [
                     0xBA,
                     ((te_pol as u8) << 7) | (te_width & 0b0111_1111),
@@ -982,7 +988,7 @@ impl Command {
                 ],
                 2,
             ),
-            Command::Interface(dm, rm, rim) => (
+            Self::Interface(dm, rm, rim) => (
                 [
                     0xF6,
                     ((dm as u8 & 0b11) << 2) | ((rm as u8 & 0b1) << 1) | (rim as u8 & 0b1),
@@ -1000,7 +1006,7 @@ impl Command {
                 ],
                 2,
             ),
-            Command::PowerCriterioControl(vcire) => (
+            Self::PowerCriterioControl(vcire) => (
                 [
                     0xC1,
                     ((vcire as u8 & 0b1) << 1),
@@ -1018,7 +1024,7 @@ impl Command {
                 ],
                 2,
             ),
-            Command::VCoreVoltageControl(vddad) => (
+            Self::VCoreVoltageControl(vddad) => (
                 [
                     0xA7,
                     0b0100_0000 | vddad as u8,
@@ -1036,16 +1042,16 @@ impl Command {
                 ],
                 2,
             ),
-            Command::Vreg1aVoltageControl(value) => {
+            Self::Vreg1aVoltageControl(value) => {
                 ([0xC3, value, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], 2)
             }
-            Command::Vreg1bVoltageControl(value) => {
+            Self::Vreg1bVoltageControl(value) => {
                 ([0xC4, value, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], 2)
             }
-            Command::Vreg2aVoltageControl(value) => {
+            Self::Vreg2aVoltageControl(value) => {
                 ([0xC9, value, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], 2)
             }
-            Command::FrameRate(divn_mode) => (
+            Self::FrameRate(divn_mode) => (
                 [
                     0xE8,
                     (divn_mode as u8 & 0b111) << 4,
@@ -1063,7 +1069,7 @@ impl Command {
                 ],
                 2,
             ),
-            Command::Spi2dataControl(data2_en, data_format) => (
+            Self::Spi2dataControl(data2_en, data_format) => (
                 [
                     0xE9,
                     (data2_en as u8 & 0b1) << 3 | (data_format as u8 & 0b111),
@@ -1081,7 +1087,7 @@ impl Command {
                 ],
                 3,
             ),
-            Command::ChargePumpFrequentControl(
+            Self::ChargePumpFrequentControl(
                 avdd_clk_ad,
                 avee_clk_ad,
                 vcl_clk_ad,
@@ -1105,9 +1111,9 @@ impl Command {
                 ],
                 4,
             ),
-            Command::InnerRegisterEnable1 => ([0xFE, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], 1),
-            Command::InnerRegisterEnable2 => ([0xEF, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], 1),
-            Command::SetGamma1(gamma) => (
+            Self::InnerRegisterEnable1 => ([0xFE, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], 1),
+            Self::InnerRegisterEnable2 => ([0xEF, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], 1),
+            Self::SetGamma1(gamma) => (
                 [
                     0xF0,
                     // 0b001, 0b000_101
@@ -1126,7 +1132,7 @@ impl Command {
                 ],
                 7,
             ),
-            Command::SetGamma2(gamma) => (
+            Self::SetGamma2(gamma) => (
                 [
                     0xF1,
                     (gamma.vr43_n & 0b0111_1111),
@@ -1144,7 +1150,7 @@ impl Command {
                 ],
                 7,
             ),
-            Command::SetGamma3(gamma) => (
+            Self::SetGamma3(gamma) => (
                 [
                     0xF2,
                     (gamma.dig2j0_p & 0b11) << 6 | (gamma.vr1_p & 0b0011_1111),
@@ -1162,7 +1168,7 @@ impl Command {
                 ],
                 7,
             ),
-            Command::SetGamma4(gamma) => (
+            Self::SetGamma4(gamma) => (
                 [
                     0xF3,
                     (gamma.vr43_p & 0b0111_1111),
@@ -1180,71 +1186,41 @@ impl Command {
                 ],
                 7,
             ),
-            Command::MemoryWrite => ([0x2c, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], 1),
-            Command::MemoryWriteContinue => ([0x3c, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], 1),
-            Command::SetUndocumented0BEh => ([0xBE, 0x11, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], 2),
-            Command::SetUndocumented0BCh => ([0xBC, 0x00, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], 2),
-            Command::SetUndocumented0BDh => ([0xBD, 0x06, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], 2),
-            Command::SetUndocumented0E1h => ([0xE1, 0x10, 0x0E, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], 3),
-            Command::SetUndocumented0DFh => {
-                ([0xDF, 0x21, 0x0c, 0x02, 0, 0, 0, 0, 0, 0, 0, 0, 0], 4)
-            }
-            Command::SetUndocumented0EDh => ([0xED, 0x1B, 0x0B, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], 3),
-            Command::SetUndocumented0AEh => ([0xAE, 0x77, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], 2),
-            Command::SetUndocumented0CDh => ([0xCD, 0x63, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], 2),
-            Command::SetUndocumented070h => (
+            Self::MemoryWrite => ([0x2c, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], 1),
+            Self::MemoryWriteContinue => ([0x3c, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], 1),
+            Self::SetUndocumented0BEh => ([0xBE, 0x11, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], 2),
+            Self::SetUndocumented0BCh => ([0xBC, 0x00, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], 2),
+            Self::SetUndocumented0BDh => ([0xBD, 0x06, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], 2),
+            Self::SetUndocumented0E1h => ([0xE1, 0x10, 0x0E, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], 3),
+            Self::SetUndocumented0DFh => ([0xDF, 0x21, 0x0c, 0x02, 0, 0, 0, 0, 0, 0, 0, 0, 0], 4),
+            Self::SetUndocumented0EDh => ([0xED, 0x1B, 0x0B, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], 3),
+            Self::SetUndocumented0AEh => ([0xAE, 0x77, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], 2),
+            Self::SetUndocumented0CDh => ([0xCD, 0x63, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], 2),
+            Self::SetUndocumented070h => (
                 [
                     0x70, 0x07, 0x07, 0x04, 0x0E, 0x0F, 0x09, 0x07, 0x08, 0x03, 0, 0, 0,
                 ],
                 10,
             ),
 
-            Command::SetUndocumented0FFh => {
-                ([0xFF, 0x60, 0x01, 0x04, 0, 0, 0, 0, 0, 0, 0, 0, 0], 4)
-            }
-            Command::SetUndocumented0EBh(value) => {
-                ([0xEB, value, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], 2)
-            }
-            Command::SetUndocumented084h(value) => {
-                ([0x84, value, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], 2)
-            }
-            Command::SetUndocumented085h(value) => {
-                ([0x85, value, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], 2)
-            }
-            Command::SetUndocumented086h(value) => {
-                ([0x86, value, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], 2)
-            }
-            Command::SetUndocumented087h(value) => {
-                ([0x87, value, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], 2)
-            }
-            Command::SetUndocumented088h(value) => {
-                ([0x88, value, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], 2)
-            }
-            Command::SetUndocumented089h(value) => {
-                ([0x89, value, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], 2)
-            }
-            Command::SetUndocumented08Ah(value) => {
-                ([0x8A, value, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], 2)
-            }
-            Command::SetUndocumented08Bh(value) => {
-                ([0x8B, value, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], 2)
-            }
-            Command::SetUndocumented08Ch(value) => {
-                ([0x8C, value, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], 2)
-            }
-            Command::SetUndocumented08Dh(value) => {
-                ([0x8D, value, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], 2)
-            }
-            Command::SetUndocumented08Eh(value) => {
-                ([0x8E, value, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], 2)
-            }
-            Command::SetUndocumented08Fh(value) => {
-                ([0x8F, value, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], 2)
-            }
-            Command::SetUndocumented090h => {
+            Self::SetUndocumented0FFh => ([0xFF, 0x60, 0x01, 0x04, 0, 0, 0, 0, 0, 0, 0, 0, 0], 4),
+            Self::SetUndocumented0EBh(value) => ([0xEB, value, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], 2),
+            Self::SetUndocumented084h(value) => ([0x84, value, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], 2),
+            Self::SetUndocumented085h(value) => ([0x85, value, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], 2),
+            Self::SetUndocumented086h(value) => ([0x86, value, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], 2),
+            Self::SetUndocumented087h(value) => ([0x87, value, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], 2),
+            Self::SetUndocumented088h(value) => ([0x88, value, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], 2),
+            Self::SetUndocumented089h(value) => ([0x89, value, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], 2),
+            Self::SetUndocumented08Ah(value) => ([0x8A, value, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], 2),
+            Self::SetUndocumented08Bh(value) => ([0x8B, value, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], 2),
+            Self::SetUndocumented08Ch(value) => ([0x8C, value, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], 2),
+            Self::SetUndocumented08Dh(value) => ([0x8D, value, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], 2),
+            Self::SetUndocumented08Eh(value) => ([0x8E, value, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], 2),
+            Self::SetUndocumented08Fh(value) => ([0x8F, value, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], 2),
+            Self::SetUndocumented090h => {
                 ([0x90, 0x08, 0x08, 0x08, 0x08, 0, 0, 0, 0, 0, 0, 0, 0], 5)
             }
-            Command::MemoryAccessControl(my, mx, mv, ml, bgr, mh) => (
+            Self::MemoryAccessControl(my, mx, mv, ml, bgr, mh) => (
                 [
                     0x36,
                     (my as u8) << 7
@@ -1267,43 +1243,43 @@ impl Command {
                 ],
                 2,
             ),
-            Command::SetUndocumented062h => (
+            Self::SetUndocumented062h => (
                 [
                     0x62, 0x18, 0x0D, 0x71, 0xED, 0x70, 0x70, 0x18, 0x0F, 0x71, 0xEF, 0x70, 0x70,
                 ],
                 13,
             ),
-            Command::SetUndocumented063h => (
+            Self::SetUndocumented063h => (
                 [
                     0x63, 0x18, 0x11, 0x71, 0xF1, 0x70, 0x70, 0x18, 0x13, 0x71, 0xF3, 0x70, 0x70,
                 ],
                 13,
             ),
-            Command::SetUndocumented064h => (
+            Self::SetUndocumented064h => (
                 [
                     0x64, 0x28, 0x29, 0xF1, 0x01, 0xF1, 0x00, 0x07, 0, 0, 0, 0, 0,
                 ],
                 8,
             ),
-            Command::SetUndocumented066h => (
+            Self::SetUndocumented066h => (
                 [
                     0x66, 0x3C, 0x00, 0xCD, 0x67, 0x45, 0x45, 0x10, 0x00, 0x00, 0x00, 0, 0,
                 ],
                 11,
             ),
-            Command::SetUndocumented067h => (
+            Self::SetUndocumented067h => (
                 [
                     0x67, 0x00, 0x3C, 0x00, 0x00, 0x00, 0x01, 0x54, 0x10, 0x32, 0x98, 0, 0,
                 ],
                 11,
             ),
-            Command::SetUndocumented074h => (
+            Self::SetUndocumented074h => (
                 [
                     0x74, 0x10, 0x85, 0x80, 0x00, 0x00, 0x4E, 0x00, 0, 0, 0, 0, 0,
                 ],
                 8,
             ),
-            Command::SetUndocumented098h => ([0x98, 0x3e, 0x07, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], 3),
+            Self::SetUndocumented098h => ([0x98, 0x3e, 0x07, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], 3),
         };
 
         // Send command over the interface
@@ -1325,19 +1301,20 @@ pub enum Logical {
 }
 
 impl From<bool> for Logical {
-    fn from(val: bool) -> Logical {
-        match val {
-            true => Logical::On,
-            false => Logical::Off,
+    fn from(val: bool) -> Self {
+        if val {
+            Self::On
+        } else {
+            Self::Off
         }
     }
 }
 
 impl From<u8> for Logical {
-    fn from(val: u8) -> Logical {
+    fn from(val: u8) -> Self {
         match val {
-            0 => Logical::Off,
-            _ => Logical::On,
+            0 => Self::Off,
+            _ => Self::On,
         }
     }
 }
@@ -1353,19 +1330,20 @@ pub enum DEPolarity {
 }
 
 impl From<bool> for DEPolarity {
-    fn from(val: bool) -> DEPolarity {
-        match val {
-            true => DEPolarity::HighEnableForRGB,
-            false => DEPolarity::LowEnableForRGB,
+    fn from(val: bool) -> Self {
+        if val {
+            Self::HighEnableForRGB
+        } else {
+            Self::LowEnableForRGB
         }
     }
 }
 
 impl From<u8> for DEPolarity {
-    fn from(val: u8) -> DEPolarity {
+    fn from(val: u8) -> Self {
         match val {
-            0 => DEPolarity::HighEnableForRGB,
-            _ => DEPolarity::LowEnableForRGB,
+            0 => Self::HighEnableForRGB,
+            _ => Self::LowEnableForRGB,
         }
     }
 }
@@ -1381,19 +1359,20 @@ pub enum TEPolarity {
 }
 
 impl From<bool> for TEPolarity {
-    fn from(val: bool) -> TEPolarity {
-        match val {
-            true => TEPolarity::PositivePulse,
-            false => TEPolarity::NegativePulse,
+    fn from(val: bool) -> Self {
+        if val {
+            Self::PositivePulse
+        } else {
+            Self::NegativePulse
         }
     }
 }
 
 impl From<u8> for TEPolarity {
-    fn from(val: u8) -> TEPolarity {
+    fn from(val: u8) -> Self {
         match val {
-            0 => TEPolarity::PositivePulse,
-            _ => TEPolarity::NegativePulse,
+            0 => Self::PositivePulse,
+            _ => Self::NegativePulse,
         }
     }
 }
@@ -1409,19 +1388,20 @@ pub enum DOTClk {
 }
 
 impl From<bool> for DOTClk {
-    fn from(val: bool) -> DOTClk {
-        match val {
-            true => DOTClk::FetchOnRising,
-            false => DOTClk::FetchOnFalling,
+    fn from(val: bool) -> Self {
+        if val {
+            Self::FetchOnRising
+        } else {
+            Self::FetchOnFalling
         }
     }
 }
 
 impl From<u8> for DOTClk {
-    fn from(val: u8) -> DOTClk {
+    fn from(val: u8) -> Self {
         match val {
-            0 => DOTClk::FetchOnRising,
-            _ => DOTClk::FetchOnFalling,
+            0 => Self::FetchOnRising,
+            _ => Self::FetchOnFalling,
         }
     }
 }
@@ -1437,19 +1417,20 @@ pub enum XSpl {
 }
 
 impl From<bool> for XSpl {
-    fn from(val: bool) -> XSpl {
-        match val {
-            true => XSpl::LowSyncClock,
-            false => XSpl::HighSyncClock,
+    fn from(val: bool) -> Self {
+        if val {
+            Self::LowSyncClock
+        } else {
+            Self::HighSyncClock
         }
     }
 }
 
 impl From<u8> for XSpl {
-    fn from(val: u8) -> XSpl {
+    fn from(val: u8) -> Self {
         match val {
-            0 => XSpl::LowSyncClock,
-            _ => XSpl::HighSyncClock,
+            0 => Self::LowSyncClock,
+            _ => Self::HighSyncClock,
         }
     }
 }
@@ -1466,10 +1447,10 @@ pub enum RCMMode {
 }
 
 impl From<u8> for RCMMode {
-    fn from(val: u8) -> RCMMode {
+    fn from(val: u8) -> Self {
         match val {
-            0b10 => RCMMode::DEMode,
-            _ => RCMMode::SyncMode,
+            0b10 => Self::DEMode,
+            _ => Self::SyncMode,
         }
     }
 }
@@ -1485,10 +1466,10 @@ pub enum SSMode {
 }
 
 impl From<u8> for SSMode {
-    fn from(val: u8) -> SSMode {
+    fn from(val: u8) -> Self {
         match val {
-            0 => SSMode::S1toS360,
-            _ => SSMode::S1toS360,
+            0 => Self::S1toS360,
+            _ => Self::S1toS360,
         }
     }
 }
@@ -1509,12 +1490,12 @@ pub enum DMMode {
 }
 
 impl From<u8> for DMMode {
-    fn from(val: u8) -> DMMode {
+    fn from(val: u8) -> Self {
         match val {
-            0 => DMMode::InternalClockOperation,
-            1 => DMMode::RGBInterfaceMode,
-            2 => DMMode::VSYNCInterfaceMode,
-            _ => DMMode::SettingDisabled,
+            0 => Self::InternalClockOperation,
+            1 => Self::RGBInterfaceMode,
+            2 => Self::VSYNCInterfaceMode,
+            _ => Self::SettingDisabled,
         }
     }
 }
@@ -1531,11 +1512,11 @@ pub enum RMMode {
 }
 
 impl From<u8> for RMMode {
-    fn from(val: u8) -> RMMode {
+    fn from(val: u8) -> Self {
         match val {
-            0 => RMMode::SystemOrVSyncInterface,
-            1 => RMMode::RGBInterface,
-            _ => RMMode::RGBInterface,
+            0 => Self::SystemOrVSyncInterface,
+            1 => Self::RGBInterface,
+            _ => Self::RGBInterface,
         }
     }
 }
@@ -1555,11 +1536,11 @@ pub enum RIMMode {
 }
 
 impl From<u8> for RIMMode {
-    fn from(val: u8) -> RIMMode {
+    fn from(val: u8) -> Self {
         match val {
-            0 => RIMMode::TransferPerPixel1,
-            1 => RIMMode::TransferPerPixel3,
-            _ => RIMMode::TransferPerPixel3,
+            0 => Self::TransferPerPixel1,
+            1 => Self::TransferPerPixel3,
+            _ => Self::TransferPerPixel3,
         }
     }
 }
@@ -1582,14 +1563,14 @@ pub enum DINVMode {
 }
 
 impl From<u8> for DINVMode {
-    fn from(val: u8) -> DINVMode {
+    fn from(val: u8) -> Self {
         match val {
-            0 => DINVMode::ColumnInversion,
-            1 => DINVMode::Inversion1Dot,
-            2 => DINVMode::Inversion2Dot,
-            3 => DINVMode::Inversion4Dot,
-            4 => DINVMode::Inversion8Dot,
-            _ => DINVMode::Inversion8Dot,
+            0 => Self::ColumnInversion,
+            1 => Self::Inversion1Dot,
+            2 => Self::Inversion2Dot,
+            3 => Self::Inversion4Dot,
+            4 => Self::Inversion8Dot,
+            _ => Self::Inversion8Dot,
         }
     }
 }
@@ -1605,17 +1586,17 @@ pub enum Data2EN {
 }
 
 impl From<u8> for Data2EN {
-    fn from(val: u8) -> Data2EN {
+    fn from(val: u8) -> Self {
         match val {
-            0 => Data2EN::Data3Wire,
-            1 => Data2EN::Data4Wire,
-            _ => Data2EN::Data4Wire,
+            0 => Self::Data3Wire,
+            1 => Self::Data4Wire,
+            _ => Self::Data4Wire,
         }
     }
 }
 
-/// DataFormat MDT
-/// Set Pixel Data Format in 2_data_line mode.
+/// `DataFormat` MDT
+/// Set Pixel Data Format in `2_data_line` mode.
 #[derive(Debug, Copy, Clone, PartialEq, Eq)]
 #[repr(u8)]
 pub enum DataFormatMDT {
@@ -1632,14 +1613,14 @@ pub enum DataFormatMDT {
 }
 
 impl From<u8> for DataFormatMDT {
-    fn from(val: u8) -> DataFormatMDT {
+    fn from(val: u8) -> Self {
         match val {
-            0 => DataFormatMDT::Color65k1PixelPerTransition,
-            1 => DataFormatMDT::Color262k1PixelPerTransition,
-            2 => DataFormatMDT::Color262k2Or3PixelPerTransition,
-            3 => DataFormatMDT::Color4Mk1PixelPerTransition,
-            4 => DataFormatMDT::Color4M2Or3PixelPerTransition,
-            _ => DataFormatMDT::Color4M2Or3PixelPerTransition,
+            0 => Self::Color65k1PixelPerTransition,
+            1 => Self::Color262k1PixelPerTransition,
+            2 => Self::Color262k2Or3PixelPerTransition,
+            3 => Self::Color4Mk1PixelPerTransition,
+            4 => Self::Color4M2Or3PixelPerTransition,
+            _ => Self::Color4M2Or3PixelPerTransition,
         }
     }
 }
@@ -1655,11 +1636,11 @@ pub enum VCIRe {
 }
 
 impl From<u8> for VCIRe {
-    fn from(val: u8) -> VCIRe {
+    fn from(val: u8) -> Self {
         match val {
-            0 => VCIRe::Internal,
-            1 => VCIRe::External,
-            _ => VCIRe::External,
+            0 => Self::Internal,
+            1 => Self::External,
+            _ => Self::External,
         }
     }
 }
@@ -1687,25 +1668,25 @@ pub enum VddAd {
 }
 
 impl From<u8> for VddAd {
-    fn from(val: u8) -> VddAd {
+    fn from(val: u8) -> Self {
         match val {
-            0x00 => VddAd::VCore1_483V,
-            0x01 => VddAd::VCore1_545V,
-            0x02 => VddAd::VCore1_590V,
-            0x03 => VddAd::VCore1_638V,
-            0x04 => VddAd::VCore1_714V,
-            0x05 => VddAd::VCore1_279V,
-            0x06 => VddAd::VCore1_859V,
-            0x07 => VddAd::VCore1_925V,
-            0x08 => VddAd::VCore1_994V,
-            0x09 => VddAd::VCore2_109V,
-            0x0a => VddAd::VCore2_193V,
-            0x0b => VddAd::VCore2_286V,
-            0x0c => VddAd::VCore2_385V,
-            0x0d => VddAd::VCore1_713V,
-            0x0e => VddAd::VCore1_713Ve,
-            0x0f => VddAd::VCore1_713Vf,
-            _ => VddAd::VCore1_713Vf,
+            0x00 => Self::VCore1_483V,
+            0x01 => Self::VCore1_545V,
+            0x02 => Self::VCore1_590V,
+            0x03 => Self::VCore1_638V,
+            0x04 => Self::VCore1_714V,
+            0x05 => Self::VCore1_279V,
+            0x06 => Self::VCore1_859V,
+            0x07 => Self::VCore1_925V,
+            0x08 => Self::VCore1_994V,
+            0x09 => Self::VCore2_109V,
+            0x0a => Self::VCore2_193V,
+            0x0b => Self::VCore2_286V,
+            0x0c => Self::VCore2_385V,
+            0x0d => Self::VCore1_713V,
+            0x0e => Self::VCore1_713Ve,
+            0x0f => Self::VCore1_713Vf,
+            _ => Self::VCore1_713Vf,
         }
     }
 }
@@ -1721,10 +1702,10 @@ pub enum GSMode {
 }
 
 impl From<u8> for GSMode {
-    fn from(val: u8) -> GSMode {
+    fn from(val: u8) -> Self {
         match val {
-            0 => GSMode::G1toG32,
-            _ => GSMode::G32toG1,
+            0 => Self::G1toG32,
+            _ => Self::G32toG1,
         }
     }
 }

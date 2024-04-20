@@ -15,7 +15,6 @@
 //! - TODO Finish the implementation
 
 #![cfg_attr(not(test), no_std)]
-
 // clippy warning level lints
 #![warn(
     // missing_docs,

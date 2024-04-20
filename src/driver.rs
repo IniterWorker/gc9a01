@@ -26,6 +26,10 @@ where
     D: DisplayDefinition,
 {
     /// Reset the display.
+    ///
+    /// # Errors
+    ///
+    /// See `OutputPin` definition for more information.
     pub fn reset<RST, DELAY>(&mut self, rst: &mut RST, delay: &mut DELAY) -> Result<(), RST::Error>
     where
         RST: OutputPin,
@@ -82,12 +86,16 @@ where
     /// Convert the display into a buffered graphics mode, supporting
     /// [embedded-graphics](https://crates.io/crates/embedded-graphics).
     ///
-    /// More information about [BufferedGraphics]
+    /// More information about [`BufferedGraphics`]
     pub fn into_buffered_graphics(self) -> Gc9a01<I, D, BufferedGraphics<D>> {
         self.into_mode(BufferedGraphics::new())
     }
 
     /// Initialise the screen in one of the available addressing modes.
+    ///
+    /// # Errors
+    ///
+    /// This method may return an error if there are communication issues with the display.
     pub fn init_with_addr_mode(&mut self, delay: &mut impl DelayNs) -> Result<(), DisplayError> {
         // TODO: implement initialization sequence
 
@@ -108,17 +116,30 @@ where
     }
 
     /// Send a raw buffer to the screen.
+    ///
+    /// # Errors
+    ///
+    /// This method may return an error if there are communication issues with the display.
     pub fn draw(&mut self, buffer: &[u8]) -> Result<(), DisplayError> {
         self.interface.send_data(DataFormat::U8(buffer))
     }
 
     /// Send a raw buffer zeroed to the screen.
+    ///
+    /// # Errors
+    ///
+    /// This method may return an error if there are communication issues with the display.
     pub fn clear_fit(&mut self) -> Result<(), DisplayError> {
         self.interface
             .send_data(DataFormat::U16(&[0, D::HEIGHT * D::WIDTH]))
     }
 
     /// Set the screen rotation.
+    ///
+    /// # Errors
+    ///
+    /// This method may return an error if there are communication issues with the display.
+    #[allow(clippy::match_same_arms)]
     pub fn set_display_rotation(&mut self, rotation: DisplayRotation) -> Result<(), DisplayError> {
         self.display_rotation = rotation;
 
@@ -133,16 +154,28 @@ where
     }
 
     /// Change the display brightness.
+    ///
+    /// # Errors
+    ///
+    /// This method may return an error if there are communication issues with the display.
     pub fn set_brightness(&mut self, brightness: Brightness) -> Result<(), DisplayError> {
         Command::DisplayBrightness(brightness.brightness).send(&mut self.interface)
     }
 
     /// Set hardware screen state
+    ///
+    /// # Errors
+    ///
+    /// This method may return an error if there are communication issues with the display.
     pub fn set_screen_state(&mut self, on: Logical) -> Result<(), DisplayError> {
         Command::DisplayState(on).send(&mut self.interface)
     }
 
     /// Set hardware to inverse the GDDRAM framebuffer output
+    ///
+    /// # Errors
+    ///
+    /// This method may return an error if there are communication issues with the display.
     pub fn set_invert_pixels(&mut self, value: bool) -> Result<(), DisplayError> {
         Command::DisplayInversion(value.into()).send(&mut self.interface)
     }
@@ -150,9 +183,12 @@ where
     /// Set hardware framebuffer to configure a limited area
     /// of the screen where any pixel should be draw.
     ///
-    /// * (x_start, y_start) - starting point
-    /// * (x_end, y_end) - ending point
+    /// * (`x_start`, `y_start`) - starting point
+    /// * (`x_end`, `y_end`) - ending point
     ///
+    /// # Errors
+    ///
+    /// This method may return an error if there are communication issues with the display.
     pub fn set_draw_area(
         &mut self,
         start: (u16, u16),
@@ -170,7 +206,7 @@ where
     }
 
     /// Get pixel screen dimensions
-    pub fn dimensions(&self) -> (u16, u16) {
+    pub const fn dimensions(&self) -> (u16, u16) {
         match self.display_rotation {
             DisplayRotation::Rotate0 | DisplayRotation::Rotate180 => (D::WIDTH, D::HEIGHT),
             DisplayRotation::Rotate90 | DisplayRotation::Rotate270 => (D::HEIGHT, D::WIDTH),
@@ -178,13 +214,18 @@ where
     }
 
     /// Get pixel screen bounds (x-1, y-1)
-    pub fn bounds(&self) -> (u16, u16) {
+    pub const fn bounds(&self) -> (u16, u16) {
         match self.display_rotation {
             DisplayRotation::Rotate0 | DisplayRotation::Rotate180 => (D::WIDTH - 1, D::HEIGHT - 1),
             DisplayRotation::Rotate90 | DisplayRotation::Rotate270 => (D::HEIGHT - 1, D::WIDTH - 1),
         }
     }
 
+    /// Flush the buffer by chuncks
+    ///
+    /// # Errors
+    ///
+    /// This method may return an error if there are communication issues with the display.
     pub(crate) fn flush_buffer_chunks(
         interface: &mut I,
         buffer: &[u16],

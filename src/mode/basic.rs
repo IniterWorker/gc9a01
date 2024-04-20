@@ -18,6 +18,7 @@ pub struct BasicMode;
 
 impl BasicMode {
     /// Create a basic mode
+    #[allow(clippy::missing_const_for_fn)]
     pub(crate) fn new() -> Self {
         Self {}
     }
@@ -29,6 +30,10 @@ where
     D: DisplayDefinition,
 {
     /// Clear the display
+    ///
+    /// # Errors
+    ///
+    /// This method may return an error if there are communication issues with the display.
     pub fn clear(&mut self) -> Result<(), DisplayError> {
         self.set_draw_area((0, 0), self.dimensions())?;
         self.clear_fit()
@@ -44,11 +49,19 @@ where
     type Error = DisplayError;
 
     /// Set the display rotation.
+    ///
+    /// # Errors
+    ///
+    /// This method may return an error if there are communication issues with the display.
     fn set_rotation(&mut self, rot: DisplayRotation) -> Result<(), DisplayError> {
         self.set_display_rotation(rot)
     }
 
     /// Initialise and clear the display in graphics mode.
+    ///
+    /// # Errors
+    ///
+    /// This method may return an error if there are communication issues with the display.
     fn init(&mut self, delay: &mut DELAY) -> Result<(), DisplayError> {
         self.init_with_addr_mode(delay)
     }

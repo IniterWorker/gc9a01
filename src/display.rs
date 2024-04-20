@@ -35,6 +35,10 @@ pub trait DisplayDefinition {
     type Buffer: AsMut<[u16]> + NewZeroed;
 
     /// Configuration hook to configure model-dependent configuration
+    ///
+    /// # Errors
+    ///
+    /// This method may return an error if there are communication issues with the display.
     fn configure(
         &self,
         iface: &mut impl WriteOnlyDataCommand,

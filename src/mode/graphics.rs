@@ -96,6 +96,10 @@ where
     }
 
     /// Write the display buffer
+    ///
+    /// # Errors
+    ///
+    /// This method may return an error if there are communication issues with the display.
     pub fn flush(&mut self) -> Result<(), DisplayError> {
         // check if you touch anything
         if self.mode.max_x < self.mode.min_x || self.mode.max_y < self.mode.min_y {
@@ -108,14 +112,8 @@ where
         let disp_min_x = self.mode.min_x;
         let disp_min_y = self.mode.min_y;
 
-        let (disp_max_x, disp_max_y) = match self.display_rotation {
-            DisplayRotation::Rotate0 | DisplayRotation::Rotate180 => {
-                ((self.mode.max_x).min(width), (self.mode.max_y).min(height))
-            }
-            DisplayRotation::Rotate90 | DisplayRotation::Rotate270 => {
-                ((self.mode.max_x).min(width), (self.mode.max_y).min(height))
-            }
-        };
+        let (disp_max_x, disp_max_y) =
+            ((self.mode.max_x).min(width), (self.mode.max_y).min(height));
 
         // reset idle state
         self.mode.min_x = u16::MAX;
@@ -227,11 +225,12 @@ where
 
         pixels
             .into_iter()
-            .filter(|Pixel(pos, _color)| bb.contains(*pos))
+            .filter(|&Pixel(pos, _color)| bb.contains(pos))
             .for_each(|Pixel(pos, color)| {
                 let color: RawU16 = color.into();
                 let color: u16 = color.into_inner();
-                self.set_pixel(pos.x as u32, pos.y as u32, color)
+                #[allow(clippy::cast_sign_loss)]
+                self.set_pixel(pos.x as u32, pos.y as u32, color);
             });
         Ok(())
     }
