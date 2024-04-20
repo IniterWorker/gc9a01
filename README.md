@@ -10,6 +10,10 @@ Rust implementation SPI 4-wire driver for the Gc9a01 display driver with a gener
 - [Generic Interface for Display Drivers](https://github.com/therealprof/display-interface)
 - [Embedded-hal v1.0.0](https://github.com/rust-embedded/embedded-hal/tree/embedded-hal-v1.0.0)
 
+## Example
+
+- [Waveshare esp32-s3-touch-lcd-1-28](https://github.com/IniterWorker/esp32-s3-touch-lcd-1-28)
+
 ## Hardware
 
 - [1.28 inch TFT LCD Display Module Round RGB 240*240 GC9A01 Driver 4 Wire SPI](https://www.aliexpress.com/item/1005001382069930.html)
