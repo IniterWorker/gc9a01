@@ -129,7 +129,7 @@ where
         };
 
         match self.display_rotation {
-            DisplayRotation::Rotate0 | DisplayRotation::Rotate270 => {
+            DisplayRotation::Rotate0 | DisplayRotation::Rotate180 => {
                 self.set_draw_area(
                     (disp_min_x + offset_x, disp_min_y + D::OFFSET_Y),
                     (disp_max_x + offset_x, disp_max_y + D::OFFSET_Y),
@@ -143,7 +143,7 @@ where
                     (disp_max_x, disp_max_y),
                 )
             }
-            DisplayRotation::Rotate90 | DisplayRotation::Rotate180 => {
+            DisplayRotation::Rotate90 | DisplayRotation::Rotate270 => {
                 self.set_draw_area(
                     (disp_min_y + offset_x, disp_min_x + D::OFFSET_Y),
                     (disp_max_y + offset_x, disp_max_x + D::OFFSET_Y),

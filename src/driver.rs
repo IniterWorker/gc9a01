@@ -144,10 +144,42 @@ where
         self.display_rotation = rotation;
 
         match self.display_rotation {
-            DisplayRotation::Rotate0 => {}
-            DisplayRotation::Rotate90 => {}
-            DisplayRotation::Rotate180 => {}
-            DisplayRotation::Rotate270 => {}
+            DisplayRotation::Rotate0 => Command::MemoryAccessControl(
+                Logical::Off,
+                Logical::Off,
+                Logical::Off,
+                Logical::On,
+                Logical::On,
+                Logical::Off,
+            )
+            .send(&mut self.interface)?,
+            DisplayRotation::Rotate90 => Command::MemoryAccessControl(
+                Logical::On,
+                Logical::Off,
+                Logical::Off,
+                Logical::On,
+                Logical::On,
+                Logical::Off,
+            )
+            .send(&mut self.interface)?,
+            DisplayRotation::Rotate180 => Command::MemoryAccessControl(
+                Logical::On,
+                Logical::On,
+                Logical::Off,
+                Logical::On,
+                Logical::On,
+                Logical::Off,
+            )
+            .send(&mut self.interface)?,
+            DisplayRotation::Rotate270 => Command::MemoryAccessControl(
+                Logical::Off,
+                Logical::On,
+                Logical::Off,
+                Logical::On,
+                Logical::On,
+                Logical::Off,
+            )
+            .send(&mut self.interface)?,
         };
 
         Ok(())
