@@ -1,6 +1,7 @@
 # GC9A01
 
 <p align="left">
+    <a href="https://github.com/initerworker/gc9a01/actions/workflows/rust-release.yml"><img src="https://github.com/initerworker/gc9a01/actions/workflows/rust-release.yml/badge.svg" alt="Github CI/CD"></a>
     <a href="https://crates.io/crates/gc9a01-rs"><img src="https://img.shields.io/crates/v/gc9a01-rs.svg" alt="Crates.io"></a>
     <a href="https://docs.rs/gc9a01-rs"><img src="https://docs.rs/gc9a01-rs/badge.svg" alt="Docs.rs"></a>
 </p>
