@@ -43,3 +43,4 @@ features = ["user-hooks"]
 
 [lib]
 name = "gc9a01"
+path = "src/lib.rs"

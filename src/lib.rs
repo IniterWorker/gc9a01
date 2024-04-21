@@ -1,18 +1,23 @@
-//! GC9A01 Display Driver
+//! # GC9A01 Display Driver
 //!
-//! This Rust crate provides a driver interface to the GC9A01 RDG TFT display driver.
-//! It support only SPI via the [`display_interface`](https://docs.rs/display_interface)
-//! abstraction crate.
-//!
-//! The abstract driver must be created using [`Gc9a01::new`](crate::Gc9a01) which accepts an interface instance,
-//! a const display hardware configuration, rotation and a mode.
+//! ## Modes
 //!
 //! - [`BasicMode`](crate::mode::BasicMode) - A simple mode with lower level methods available.
 //! - [`BufferedGraphics`](crate::mode::BufferedGraphics) - A framebuffered mode with additional methods and integration with
 //!
-//! # TODO
-//! - TODO Example
-//! - TODO Finish the implementation
+//! ## Support
+//!
+//! - [Embedded-graphics 2D graphics library](https://github.com/embedded-graphics/embedded-graphics)
+//! - [Generic Interface for Display Drivers](https://github.com/therealprof/display-interface)
+//! - [Embedded-hal v1.0.0](https://github.com/rust-embedded/embedded-hal/tree/embedded-hal-v1.0.0)
+//!
+//! ## Example
+//!
+//! - [Waveshare esp32-s3-touch-lcd-1-28](https://github.com/IniterWorker/esp32-s3-touch-lcd-1-28)
+//!
+//! ## Hardware
+//!
+//! - [1.28 inch TFT LCD Display Module Round RGB 240*240 GC9A01 Driver 4 Wire SPI](https://www.aliexpress.com/item/1005001382069930.html)
 
 #![cfg_attr(not(test), no_std)]
 // clippy warning level lints

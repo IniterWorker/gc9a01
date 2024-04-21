@@ -1,5 +1,7 @@
 set -e
 
+echo '+just check-readme'
+just check-readme
 echo '+cargo clippy --all-targets --all-features --workspace -- -D warnings'
 cargo clippy --all-targets --all-features --workspace -- -D warnings
 echo '+cargo fmt ---all -- --check --color always'
