@@ -6,11 +6,17 @@ Rust implementation SPI 4-wire driver for the [`Gc9a01`](https://crates.io/crate
 
 ## [Unreleased] - ReleaseDate
 
+## [0.2.1] - 2024-04-20
+
 ### Added
 
 - Add `cargo-husky` user hooks.
 - Add `cargo fmt` inside the workflow.
 - Add `just generate-readme` inside the workflow.
+
+### Fixed
+
+- Fix rotation memory access control (0, 90, 180, 270).
 
 ## [0.2.0] - 2024-04-19
 
@@ -24,6 +30,7 @@ Rust implementation SPI 4-wire driver for the [`Gc9a01`](https://crates.io/crate
 - Move playgrounds outside the library project.
 
 <!-- next-url -->
-[unreleased]: https://github.com/IniterWorker/gc9a01/compare/0.2.0...HEAD
+[unreleased]: https://github.com/IniterWorker/gc9a01/compare/0.2.1...HEAD
 
+[0.2.1]: https://github.com/IniterWorker/gc9a01/compare/0.2.0...0.2.1
 [0.2.0]: https://github.com/IniterWorker/gc9a01/compare/0.1.0...0.2.0
