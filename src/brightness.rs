@@ -3,7 +3,7 @@
 /// Struct that holds display brightness
 #[derive(Debug, Copy, Clone, PartialEq, Eq)]
 pub struct Brightness {
-    pub(crate) brightness: u8,
+    pub brightness: u8,
 }
 
 impl Default for Brightness {
