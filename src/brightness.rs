@@ -28,7 +28,16 @@ impl Brightness {
     /// Brightest predefined brightness level
     pub const BRIGHTEST: Self = Self::custom(0xFF);
 
-    const fn custom(brightness: u8) -> Self {
+    /// Create a new `Brightness` from a custom raw input
+    ///
+    /// # Notes
+    ///
+    /// It should be checked what is the relationship between this written value and output brightness of the display.
+    /// This relationship is defined on the display module specification.
+    /// In principle, the relationship is that `00h` value means the lowest brightness and `FFh` value means the highest brightness.
+    ///
+    #[must_use]
+    pub const fn custom(brightness: u8) -> Self {
         Self { brightness }
     }
 }
