@@ -233,7 +233,7 @@ where
     }
 
     /// Get screen rotation
-    pub fn get_screen_rotation(&mut self) -> DisplayRotation {
+    pub const fn get_screen_rotation(&self) -> DisplayRotation {
         self.display_rotation
     }
 
