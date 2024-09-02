@@ -6,6 +6,12 @@ Rust implementation SPI 4-wire driver for the [`Gc9a01`](https://crates.io/crate
 
 ## [Unreleased] - ReleaseDate
 
+## [0.3.0] - 2024-09-02
+
+### Changed
+
+- change: fn brightness::custom move from private to public
+
 ## [0.2.1] - 2024-04-20
 
 ### Added
