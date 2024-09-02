@@ -12,6 +12,12 @@ Rust implementation SPI 4-wire driver for the [`Gc9a01`](https://crates.io/crate
 
 - change: fn brightness::custom move from private to public
 
+### Fixed
+
+- clippy: allow clippy::needless_pass_by_ref_mut for driver reset
+- fix: get_screen_rotation as mutable reference, but not used mutably
+- clippy: src/command.rs allow clippy::doc_markdow
+
 ## [0.2.1] - 2024-04-20
 
 ### Added
@@ -36,7 +42,8 @@ Rust implementation SPI 4-wire driver for the [`Gc9a01`](https://crates.io/crate
 - Move playgrounds outside the library project.
 
 <!-- next-url -->
-[unreleased]: https://github.com/IniterWorker/gc9a01/compare/0.2.1...HEAD
+[unreleased]: https://github.com/IniterWorker/gc9a01/compare/0.3.0...HEAD
 
+[0.3.0]: https://github.com/IniterWorker/gc9a01/compare/0.2.1...0.3.0
 [0.2.1]: https://github.com/IniterWorker/gc9a01/compare/0.2.0...0.2.1
 [0.2.0]: https://github.com/IniterWorker/gc9a01/compare/0.1.0...0.2.0
