@@ -30,6 +30,7 @@ where
     /// # Errors
     ///
     /// See `OutputPin` definition for more information.
+    #[allow(clippy::needless_pass_by_ref_mut)]
     pub fn reset<RST, DELAY>(&mut self, rst: &mut RST, delay: &mut DELAY) -> Result<(), RST::Error>
     where
         RST: OutputPin,
