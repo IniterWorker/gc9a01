@@ -1,3 +1,4 @@
+#![allow(clippy::doc_markdown)]
 #![allow(clippy::match_same_arms)]
 //! Commands
 
