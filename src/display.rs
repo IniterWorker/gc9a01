@@ -3,10 +3,14 @@
 //! Reference all screen hardware definition
 
 use display_interface::{DisplayError, WriteOnlyDataCommand};
+use embedded_graphics::{framebuffer::buffer_size, pixelcolor::Bgr565};
 use embedded_hal::delay::DelayNs;
 
-use crate::command::{
-    Command, DINVMode, Dbi, Dpi, GSMode, Gamma1, Gamma2, Gamma3, Gamma4, Logical, SSMode,
+use crate::{
+    command::{
+        Command, DINVMode, Dbi, Dpi, GSMode, Gamma1, Gamma2, Gamma3, Gamma4, Logical, SSMode,
+    },
+    Gc9a01Framebuffer,
 };
 
 /// Screen information
@@ -31,8 +35,8 @@ pub trait DisplayDefinition {
     /// The driver maximum rows    
     const ROWS: u16 = 240;
 
-    /// Buffer type Sized
-    type Buffer: AsMut<[u16]> + NewZeroed;
+    /// Buffer data frame buffer
+    type Buffer;
 
     /// Configuration hook to configure model-dependent configuration
     ///
@@ -44,6 +48,8 @@ pub trait DisplayDefinition {
         iface: &mut impl WriteOnlyDataCommand,
         delay: &mut impl DelayNs,
     ) -> Result<(), DisplayError>;
+
+    fn new_buffer() -> Self::Buffer;
 }
 
 /// Screen Definition
@@ -55,7 +61,13 @@ impl DisplayDefinition for DisplayResolution240x240 {
     const WIDTH: u16 = 240;
     const HEIGHT: u16 = 240;
 
-    type Buffer = [u16; Self::WIDTH as usize * Self::HEIGHT as usize];
+    //type Buffer = [u16; Self::WIDTH as usize * Self::HEIGHT as usize];
+
+    type Buffer = Gc9a01Framebuffer<
+        { Self::WIDTH as usize },
+        { Self::HEIGHT as usize },
+        { buffer_size::<Bgr565>(Self::WIDTH as usize, Self::HEIGHT as usize) },
+    >;
 
     fn configure(
         &self,
@@ -159,15 +171,8 @@ impl DisplayDefinition for DisplayResolution240x240 {
 
         Ok(())
     }
-}
 
-pub trait NewZeroed {
-    /// Creates a new value with its memory set to zero
-    fn new_zeroed() -> Self;
-}
-
-impl<const N: usize> NewZeroed for [u16; N] {
-    fn new_zeroed() -> Self {
-        [0u16; N]
+    fn new_buffer() -> Self::Buffer {
+        Self::Buffer::new()
     }
 }

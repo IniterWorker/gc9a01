@@ -67,6 +67,14 @@
     clippy::indexing_slicing
 )]
 
+use embedded_graphics::{
+    framebuffer::Framebuffer,
+    pixelcolor::{
+        raw::{LittleEndian, RawU16},
+        Rgb565,
+    },
+};
+
 // export commands
 pub mod command;
 // export screen configuration
@@ -85,3 +93,6 @@ mod spi;
 // export the driver and interface
 pub use driver::Gc9a01;
 pub use spi::SPIDisplayInterface;
+
+type Gc9a01Framebuffer<const WIDTH: usize, const HEIGHT: usize, const N: usize> =
+    Framebuffer<Rgb565, RawU16, LittleEndian, WIDTH, HEIGHT, N>;

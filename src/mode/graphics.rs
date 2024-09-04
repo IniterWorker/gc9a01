@@ -1,14 +1,13 @@
 //! Buffered Graphic Implementation
 
+use core::slice;
+
 use display_interface::{DisplayError, WriteOnlyDataCommand};
-use embedded_graphics_core::{pixelcolor::raw::RawU16, prelude::RawData};
+use embedded_graphics::geometry::Dimensions;
+use embedded_graphics::{pixelcolor::Rgb565, prelude::*, Pixel};
 use embedded_hal::delay::DelayNs;
 
-use crate::{
-    display::{DisplayDefinition, NewZeroed},
-    rotation::DisplayRotation,
-    Gc9a01,
-};
+use crate::{display::DisplayDefinition, rotation::DisplayRotation, Gc9a01, Gc9a01Framebuffer};
 
 /// Buffered Graphic Implementation
 ///
@@ -35,7 +34,7 @@ where
     /// Create a new buffered graphics mode instance.
     pub(crate) fn new() -> Self {
         Self {
-            buffer: NewZeroed::new_zeroed(),
+            buffer: D::new_buffer(),
             min_x: u16::MAX,
             max_x: u16::MIN,
             min_y: u16::MAX,
@@ -44,10 +43,11 @@ where
     }
 }
 
-impl<I, D, DELAY> DisplayConfiguration<DELAY> for Gc9a01<I, D, BufferedGraphics<D>>
+impl<const WIDTH: usize, const HEIGHT: usize, const N: usize, I, D, DELAY>
+    DisplayConfiguration<DELAY> for Gc9a01<I, D, BufferedGraphics<D>>
 where
     I: WriteOnlyDataCommand,
-    D: DisplayDefinition,
+    D: DisplayDefinition<Buffer = Gc9a01Framebuffer<WIDTH, HEIGHT, N>>,
     DELAY: DelayNs,
 {
     type Error = DisplayError;
@@ -64,17 +64,17 @@ where
     }
 }
 
-impl<I, D> Gc9a01<I, D, BufferedGraphics<D>>
+impl<const WIDTH: usize, const HEIGHT: usize, const N: usize, I, D>
+    Gc9a01<I, D, BufferedGraphics<D>>
 where
     I: WriteOnlyDataCommand,
-    D: DisplayDefinition,
+    D: DisplayDefinition<Buffer = Gc9a01Framebuffer<WIDTH, HEIGHT, N>>,
 {
     /// Clear the display buffer
     /// NOTE: Must use `flush` to apply changes
     pub fn clear(&mut self) {
-        for b in self.mode.buffer.as_mut() {
-            *b = 0;
-        }
+        #[allow(clippy::let_underscore_must_use)]
+        let _ = self.mode.buffer.clear(Rgb565::BLACK);
 
         let (max_x, max_y) = self.dimensions();
         self.mode.min_x = u16::MIN;
@@ -83,16 +83,27 @@ where
         self.mode.max_y = max_y;
     }
 
-    pub fn fill(&mut self, color: u16) {
-        for b in self.mode.buffer.as_mut() {
-            *b = color;
-        }
+    pub fn fill(&mut self, color: Rgb565) {
+        #[allow(clippy::let_underscore_must_use)]
+        let _ = self.mode.buffer.clear(color);
 
         let (max_x, max_y) = self.dimensions();
         self.mode.min_x = u16::MIN;
         self.mode.max_x = max_x;
         self.mode.min_y = u16::MIN;
         self.mode.max_y = max_y;
+    }
+
+    #[allow(clippy::cast_ptr_alignment)]
+    fn convert_u8_to_u16_slice(input: &[u8]) -> &[u16] {
+        // Ensure the length is even
+        assert!(input.len() % 2 == 0);
+
+        // Convert &[u8] to &[u16] safely
+        let ptr: *const u16 = input.as_ptr().cast::<u16>();
+        let len = input.len() / 2;
+
+        unsafe { slice::from_raw_parts(ptr, len) }
     }
 
     /// Write the display buffer
@@ -137,7 +148,7 @@ where
 
                 Self::flush_buffer_chunks(
                     &mut self.interface,
-                    self.mode.buffer.as_mut(),
+                    Self::convert_u8_to_u16_slice(self.mode.buffer.data()),
                     width as usize,
                     (disp_min_x, disp_min_y),
                     (disp_max_x, disp_max_y),
@@ -151,7 +162,7 @@ where
 
                 Self::flush_buffer_chunks(
                     &mut self.interface,
-                    self.mode.buffer.as_mut(),
+                    Self::convert_u8_to_u16_slice(self.mode.buffer.data()),
                     height as usize,
                     (disp_min_y, disp_min_x),
                     (disp_max_y, disp_max_x),
@@ -161,45 +172,33 @@ where
     }
 
     // Turn a pixel on or off
-    pub fn set_pixel(&mut self, x: u32, y: u32, value: u16) {
+    pub fn set_pixel(&mut self, x: u32, y: u32, value: Rgb565) {
         let rotation = self.display_rotation;
 
-        let idx = match rotation {
-            DisplayRotation::Rotate0 | DisplayRotation::Rotate180 => {
-                ((y as usize) * D::WIDTH as usize) + (x as usize)
-            }
+        #[allow(clippy::cast_possible_wrap)] // for efficient
+        let pos = match rotation {
+            DisplayRotation::Rotate0 | DisplayRotation::Rotate180 => Point::new(x as i32, y as i32),
             DisplayRotation::Rotate90 | DisplayRotation::Rotate270 => {
-                ((x as usize) * D::HEIGHT as usize) + (y as usize)
+                Point::new(y as i32, x as i32)
             }
         };
 
-        if let Some(byte) = self.mode.buffer.as_mut().get_mut(idx) {
-            self.mode.min_x = self.mode.min_x.min(x as u16);
-            self.mode.max_x = self.mode.max_x.max(x as u16);
-            self.mode.min_y = self.mode.min_y.min(y as u16);
-            self.mode.max_y = self.mode.max_y.max(y as u16);
+        self.mode.buffer.set_pixel(pos, value);
 
-            *byte = (value >> 8) & 0xFF | (value << 8) & 0xFF00;
-        }
+        self.mode.min_x = self.mode.min_x.min(x as u16);
+        self.mode.max_x = self.mode.max_x.max(x as u16);
+        self.mode.min_y = self.mode.min_y.min(y as u16);
+        self.mode.max_y = self.mode.max_y.max(y as u16);
     }
 }
 
-#[cfg(feature = "graphics")]
-use embedded_graphics_core::{
-    draw_target::DrawTarget,
-    geometry::Size,
-    geometry::{Dimensions, OriginDimensions},
-    pixelcolor::Rgb565,
-    Pixel,
-};
-
 use super::DisplayConfiguration;
 
-#[cfg(feature = "graphics")]
-impl<I, D> OriginDimensions for Gc9a01<I, D, BufferedGraphics<D>>
+impl<const WIDTH: usize, const HEIGHT: usize, const N: usize, I, D> OriginDimensions
+    for Gc9a01<I, D, BufferedGraphics<D>>
 where
     I: WriteOnlyDataCommand,
-    D: DisplayDefinition,
+    D: DisplayDefinition<Buffer = Gc9a01Framebuffer<WIDTH, HEIGHT, N>>,
 {
     fn size(&self) -> Size {
         let (w, h) = self.dimensions();
@@ -207,13 +206,12 @@ where
     }
 }
 
-#[cfg(feature = "graphics")]
-impl<I, D> DrawTarget for Gc9a01<I, D, BufferedGraphics<D>>
+impl<const WIDTH: usize, const HEIGHT: usize, const N: usize, I, D> DrawTarget
+    for Gc9a01<I, D, BufferedGraphics<D>>
 where
     I: WriteOnlyDataCommand,
-    D: DisplayDefinition,
+    D: DisplayDefinition<Buffer = Gc9a01Framebuffer<WIDTH, HEIGHT, N>>,
 {
-    // TODO: figure out a way to handle all case
     type Color = Rgb565;
     type Error = DisplayError;
 
@@ -227,8 +225,6 @@ where
             .into_iter()
             .filter(|&Pixel(pos, _color)| bb.contains(pos))
             .for_each(|Pixel(pos, color)| {
-                let color: RawU16 = color.into();
-                let color: u16 = color.into_inner();
                 #[allow(clippy::cast_sign_loss)]
                 self.set_pixel(pos.x as u32, pos.y as u32, color);
             });
