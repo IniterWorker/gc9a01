@@ -3,20 +3,30 @@ name = "gc9a01-rs"
 categories = ["embedded", "no-std"]
 version = "0.3.0"
 edition = "2021"
-authors = [
-    "Walter Bonetti <walter.bonetti@epitech.eu>"
-]
+authors = ["Walter Bonetti <walter.bonetti@epitech.eu>"]
 license = "MIT OR Apache-2.0"
 description = "SPI 4-wire driver for GC9A01 display controller"
-keywords = ["no-std", "gc9a01", "embedded-graphics", "embedded", "embedded-hal-driver"]
-include = ["src/**/*.rs", "crates-io.md", "README.md", "LICENSE-APACHE", "LICENSE-MIT"]
+keywords = [
+    "no-std",
+    "gc9a01",
+    "embedded-graphics",
+    "embedded",
+    "embedded-hal-driver",
+]
+include = [
+    "src/**/*.rs",
+    "crates-io.md",
+    "README.md",
+    "LICENSE-APACHE",
+    "LICENSE-MIT",
+]
 repository = "https://github.com/IniterWorker/gc9a01"
 readme = "README.md"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [package.metadata.docs.rs]
-targets = [ "thumbv7m-none-eabi", "thumbv7em-none-eabihf" ]
+targets = ["thumbv7m-none-eabi", "thumbv7em-none-eabihf"]
 
 [dependencies]
 # Embedded HAL abstraction
