@@ -211,8 +211,7 @@ pub enum Command {
     /// * MX Column Address Order These 3 bits control MCU to memory write/read direction.
     /// * MV Row / Column Exchange
     /// * ML Vertical Refresh Order LCD vertical refresh direction control.
-    /// * BGR RGB-BGR Order
-    /// * Color selector switch control (0=RGB color filter panel, 1=BGR color filter panel)
+    /// * BGR RGB-BGR Order Color selector switch control (0=RGB color filter panel, 1=BGR color filter panel)
     /// * MH Horizontal Refresh ORDER LCD horizontal refreshing direction control.
     ///
     /// ## Description

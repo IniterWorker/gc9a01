@@ -3,7 +3,7 @@
 //! Reference all screen hardware definition
 
 use display_interface::{DisplayError, WriteOnlyDataCommand};
-use embedded_graphics::{framebuffer::buffer_size, pixelcolor::Bgr565};
+use embedded_graphics::{framebuffer::buffer_size, pixelcolor::Rgb565};
 use embedded_hal::delay::DelayNs;
 
 use crate::{
@@ -66,7 +66,7 @@ impl DisplayDefinition for DisplayResolution240x240 {
     type Buffer = Gc9a01Framebuffer<
         { Self::WIDTH as usize },
         { Self::HEIGHT as usize },
-        { buffer_size::<Bgr565>(Self::WIDTH as usize, Self::HEIGHT as usize) },
+        { buffer_size::<Rgb565>(Self::WIDTH as usize, Self::HEIGHT as usize) },
     >;
 
     fn configure(
@@ -78,16 +78,6 @@ impl DisplayDefinition for DisplayResolution240x240 {
         Command::InnerRegisterEnable2.send(iface)?;
 
         Command::DispalyFunctionControl(GSMode::G1toG32, SSMode::S1toS360, 0, 0).send(iface)?;
-
-        Command::MemoryAccessControl(
-            Logical::Off,
-            Logical::Off,
-            Logical::Off,
-            Logical::On,
-            Logical::On,
-            Logical::Off,
-        )
-        .send(iface)?;
 
         // maybe an issue
         Command::PixelFormatSet(Dbi::Pixel16bits, Dpi::Pixel16bits).send(iface)?;

@@ -150,7 +150,7 @@ where
                 Logical::Off,
                 Logical::Off,
                 Logical::On,
-                Logical::On,
+                Logical::Off, // enforce RGB
                 Logical::Off,
             )
             .send(&mut self.interface)?,
@@ -159,7 +159,7 @@ where
                 Logical::Off,
                 Logical::Off,
                 Logical::On,
-                Logical::On,
+                Logical::Off, // enforce RGB
                 Logical::Off,
             )
             .send(&mut self.interface)?,
@@ -168,7 +168,7 @@ where
                 Logical::On,
                 Logical::Off,
                 Logical::On,
-                Logical::On,
+                Logical::Off, // enforce RGB
                 Logical::Off,
             )
             .send(&mut self.interface)?,
@@ -177,7 +177,7 @@ where
                 Logical::On,
                 Logical::Off,
                 Logical::On,
-                Logical::On,
+                Logical::Off, // enforce RGB
                 Logical::Off,
             )
             .send(&mut self.interface)?,

@@ -4,7 +4,8 @@ use core::slice;
 
 use display_interface::{DisplayError, WriteOnlyDataCommand};
 use embedded_graphics::geometry::Dimensions;
-use embedded_graphics::{pixelcolor::Rgb565, prelude::*, Pixel};
+use embedded_graphics::pixelcolor::Rgb565;
+use embedded_graphics::{prelude::*, Pixel};
 use embedded_hal::delay::DelayNs;
 
 use crate::{display::DisplayDefinition, rotation::DisplayRotation, Gc9a01, Gc9a01Framebuffer};
