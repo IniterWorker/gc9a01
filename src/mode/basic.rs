@@ -7,12 +7,7 @@ use crate::{display::DisplayDefinition, rotation::DisplayRotation, Gc9a01};
 
 use super::DisplayConfiguration;
 
-/// Buffered Graphic Implementation
-///
-/// This implementation provides a buffer in system memory.
-/// This buffer is drawn to by [`set_pixel`](Gc9a01::set_pixel) commands or
-/// [`embedded-graphics`](https://docs.rs/embedded-graphics) commands.
-/// The display can then be updated using the [`flush`](Gc9a01::flush) method.
+/// A mode with no additional functionality beyond that provided by the base [`Gc9a01`] struct.
 #[derive(Debug, Clone)]
 pub struct BasicMode;
 

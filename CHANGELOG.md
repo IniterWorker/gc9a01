@@ -6,6 +6,11 @@ Rust implementation SPI 4-wire driver for the [`Gc9a01`](https://crates.io/crate
 
 ## [Unreleased] - ReleaseDate
 
+### Fixed
+
+- Fix: #8 partial buffered screen update
+- Fix: command, driver and basic documentation
+
 ## [0.3.0] - 2024-09-02
 
 ### Changed

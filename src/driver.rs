@@ -59,6 +59,9 @@ where
     I: WriteOnlyDataCommand,
     D: DisplayDefinition,
 {
+    /// Create a basic [`Gc9a01`] interface.
+    ///
+    /// Use the `into_buffed_graphics` methods to enable more functionality.
     pub fn new(interface: I, screen: D, screen_rotation: DisplayRotation) -> Self {
         Self {
             interface,

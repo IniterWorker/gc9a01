@@ -734,7 +734,7 @@ pub enum Command {
 }
 
 impl Command {
-    /// Send command to SSD1306
+    /// Send command to [`Gc9a01`]
     ///
     /// # Errors
     ///

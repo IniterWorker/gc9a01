@@ -1,9 +1,14 @@
 //! # GC9A01 Display Driver
 //!
-//! ## Modes
+//! This crate provides a driver interface to the GC9A01 LCD display driver. It
+//! supports SPI via the [`display_interface`](https://docs.rs/display_interface) crate.
 //!
-//! - [`BasicMode`](crate::mode::BasicMode) - A simple mode with lower level methods available.
-//! - [`BufferedGraphics`](crate::mode::BufferedGraphics) - A framebuffered mode with additional methods and integration with
+//! The main driver is created using [`Gc9a01::new`] which accepts an interface instance, display,
+//! size, rotation and mode. The following display modes are supported:
+//!
+//! - [`BasicMode`] - A simple mode with lower level methods available.
+//! - [`BufferedGraphics`] - A framebuffered mode with additional methods and integration with
+//!   [embedded-graphics](https://docs.rs/embedded-graphics).
 //!
 //! ## Support
 //!
