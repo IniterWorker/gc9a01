@@ -106,14 +106,17 @@ where
             return Ok(());
         }
 
-        let (width, height) = self.dimensions();
+        let (bound_width, bound_height) = self.bounds();
+        let (screen_width, screen_height) = self.dimensions();
 
         // Determine witch bytes need to be sent
         let disp_min_x = self.mode.min_x;
         let disp_min_y = self.mode.min_y;
 
-        let (disp_max_x, disp_max_y) =
-            ((self.mode.max_x).min(width), (self.mode.max_y).min(height));
+        let (disp_max_x, disp_max_y) = (
+            (self.mode.max_x).min(bound_width),
+            (self.mode.max_y).min(bound_height),
+        );
 
         // reset idle state
         self.mode.min_x = u16::MAX;
@@ -138,7 +141,7 @@ where
                 Self::flush_buffer_chunks(
                     &mut self.interface,
                     self.mode.buffer.as_mut(),
-                    width as usize,
+                    screen_width as usize,
                     (disp_min_x, disp_min_y),
                     (disp_max_x, disp_max_y),
                 )
@@ -152,7 +155,7 @@ where
                 Self::flush_buffer_chunks(
                     &mut self.interface,
                     self.mode.buffer.as_mut(),
-                    height as usize,
+                    screen_height as usize,
                     (disp_min_y, disp_min_x),
                     (disp_max_y, disp_max_x),
                 )

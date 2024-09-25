@@ -227,8 +227,8 @@ where
         start: (u16, u16),
         end: (u16, u16),
     ) -> Result<(), DisplayError> {
-        Command::ColumnAddressSet(start.0, end.0.saturating_sub(1)).send(&mut self.interface)?;
-        Command::RowAddressSet(start.1, end.1.saturating_sub(1)).send(&mut self.interface)?;
+        Command::ColumnAddressSet(start.0, end.0).send(&mut self.interface)?;
+        Command::RowAddressSet(start.1, end.1).send(&mut self.interface)?;
 
         Ok(())
     }
@@ -268,15 +268,17 @@ where
     ) -> Result<(), DisplayError> {
         Command::MemoryWrite.send(interface)?;
 
-        let num_pages = (lower_right.1 - upper_left.1) as usize + 1;
+        // Number of rows to process (Y range)
+        let num_pages = (lower_right.1 - upper_left.1 + 1) as usize;
 
-        let starting_page = (upper_left.1) as usize;
+        // Starting row (Y coordinate)
+        let starting_page = upper_left.1 as usize;
 
-        // Calculate start and end X coordinates for each page
+        // X coordinates (columns) for the rectangle
         let page_lower = upper_left.0 as usize;
-        let page_upper = lower_right.0 as usize;
+        let page_upper = ((lower_right.0 + 1) as usize).min(disp_width); // +1 to include the last column
 
-        // TODO: improve this
+        // Process the buffer in rows (chunks of disp_width)
         buffer
             .chunks(disp_width)
             .skip(starting_page)

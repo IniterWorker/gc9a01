@@ -35,7 +35,7 @@ where
     ///
     /// This method may return an error if there are communication issues with the display.
     pub fn clear(&mut self) -> Result<(), DisplayError> {
-        self.set_draw_area((0, 0), self.dimensions())?;
+        self.set_draw_area((0, 0), self.bounds())?;
         self.clear_fit()
     }
 }
