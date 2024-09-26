@@ -40,4 +40,13 @@ impl Brightness {
     pub const fn custom(brightness: u8) -> Self {
         Self { brightness }
     }
+
+    /// Returns the brightness as a `u8`.
+    ///
+    /// # Note
+    /// This function is provided for convenience only. It does not read the brightness from the hardware driver.
+    #[must_use]
+    pub const fn brightness(&self) -> u8 {
+        self.brightness
+    }
 }
