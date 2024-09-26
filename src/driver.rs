@@ -287,6 +287,6 @@ where
             .skip(starting_page)
             .take(num_pages)
             .map(|s| &s[page_lower..page_upper])
-            .try_for_each(|c| interface.send_data(DataFormat::U16(c)))
+            .try_for_each(|c| interface.send_data(DataFormat::U16BEIter(&mut c.iter().copied())))
     }
 }

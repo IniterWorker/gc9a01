@@ -163,7 +163,8 @@ where
         }
     }
 
-    // Turn a pixel on or off
+    /// Set a pixel color. If the X and Y coordinates are out of the bounds
+    /// of the display, this method call is a noop
     pub fn set_pixel(&mut self, x: u32, y: u32, value: u16) {
         let rotation = self.display_rotation;
 
@@ -176,13 +177,13 @@ where
             }
         };
 
-        if let Some(byte) = self.mode.buffer.as_mut().get_mut(idx) {
+        if let Some(color) = self.mode.buffer.as_mut().get_mut(idx) {
             self.mode.min_x = self.mode.min_x.min(x as u16);
             self.mode.max_x = self.mode.max_x.max(x as u16);
             self.mode.min_y = self.mode.min_y.min(y as u16);
             self.mode.max_y = self.mode.max_y.max(y as u16);
 
-            *byte = (value >> 8) & 0xFF | (value << 8) & 0xFF00;
+            *color = value;
         }
     }
 }
