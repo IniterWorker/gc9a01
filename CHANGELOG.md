@@ -4,7 +4,7 @@ Rust implementation SPI 4-wire driver for the [`Gc9a01`](https://crates.io/crate
 
 <!-- next-header -->
 
-## [Unreleased] - ReleaseDate
+## [0.3.1] - 2024-09-29
 
 ### Fixed
 
@@ -51,8 +51,9 @@ Rust implementation SPI 4-wire driver for the [`Gc9a01`](https://crates.io/crate
 - Move playgrounds outside the library project.
 
 <!-- next-url -->
-[unreleased]: https://github.com/IniterWorker/gc9a01/compare/0.3.0...HEAD
+[unreleased]: https://github.com/IniterWorker/gc9a01/compare/0.3.1...HEAD
 
+[0.3.1]: https://github.com/IniterWorker/gc9a01/compare/0.3.0...0.3.1
 [0.3.0]: https://github.com/IniterWorker/gc9a01/compare/0.2.1...0.3.0
 [0.2.1]: https://github.com/IniterWorker/gc9a01/compare/0.2.0...0.2.1
 [0.2.0]: https://github.com/IniterWorker/gc9a01/compare/0.1.0...0.2.0
