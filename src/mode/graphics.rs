@@ -1,14 +1,20 @@
 //! Buffered Graphic Implementation
 
 use display_interface::{DisplayError, WriteOnlyDataCommand};
-use embedded_graphics_core::{pixelcolor::raw::RawU16, prelude::RawData};
-use embedded_hal::delay::DelayNs;
+
+use embedded_graphics_core::pixelcolor::IntoStorage;
+use embedded_graphics_core::{
+    pixelcolor::raw::RawU16,
+    prelude::{Point, RawData},
+    primitives::Rectangle,
+};
 
 use crate::{
     display::{DisplayDefinition, NewZeroed},
     rotation::DisplayRotation,
     Gc9a01,
 };
+use embedded_hal::delay::DelayNs;
 
 /// Buffered Graphic Implementation
 ///
@@ -163,6 +169,56 @@ where
         }
     }
 
+    /// Set the pixels
+    ///
+    /// # Errors
+    ///
+    /// This method may return an error if there are communication issues with the display.
+    pub fn set_pixels<T>(
+        &mut self,
+        start: (u16, u16),
+        end: (u16, u16),
+        colors: T,
+    ) -> Result<(), DisplayError>
+    where
+        T: IntoIterator<Item = u16>,
+    {
+        let x = start.0;
+        let y = start.1;
+        let rotation = self.display_rotation;
+
+        let idx = match rotation {
+            DisplayRotation::Rotate0 | DisplayRotation::Rotate180 => {
+                ((y as usize) * D::WIDTH as usize) + (x as usize)
+            }
+            DisplayRotation::Rotate90 | DisplayRotation::Rotate270 => {
+                ((x as usize) * D::HEIGHT as usize) + (y as usize)
+            }
+        };
+
+        let mut buffer_index = idx;
+        let buffer_len = self.mode.buffer.as_mut().len();
+
+        for color in colors {
+            if buffer_index < buffer_len {
+                return Err(DisplayError::OutOfBoundsError);
+            }
+
+            // Directly copy the color into the buffer
+            unsafe {
+                *self.mode.buffer.as_mut().get_unchecked_mut(buffer_index) = color;
+            }
+            buffer_index += 1;
+        }
+
+        self.mode.min_x = self.mode.min_x.min(start.0);
+        self.mode.max_x = self.mode.max_x.max(end.0);
+        self.mode.min_y = self.mode.min_y.min(start.1);
+        self.mode.max_y = self.mode.max_y.max(end.1);
+
+        Ok(())
+    }
+
     /// Set a pixel color. If the X and Y coordinates are out of the bounds
     /// of the display, this method call is a noop
     pub fn set_pixel(&mut self, x: u32, y: u32, value: u16) {
@@ -237,5 +293,72 @@ where
                 self.set_pixel(pos.x as u32, pos.y as u32, color);
             });
         Ok(())
+    }
+
+    fn fill_contiguous<O>(&mut self, area: &Rectangle, colors: O) -> Result<(), Self::Error>
+    where
+        O: IntoIterator<Item = Self::Color>,
+    {
+        area.bottom_right().map_or(Ok(()), |bottom_right| {
+            let mut count = 0u32;
+            let max = area.size.width * area.size.height;
+
+            let mut colors = colors
+                .into_iter()
+                .take_while(|_| {
+                    count += 1;
+                    count <= max
+                })
+                .map(|color| RawU16::from(color).into_inner());
+
+            #[allow(clippy::cast_sign_loss)]
+            let sx = area.top_left.x as u16;
+            #[allow(clippy::cast_sign_loss)]
+            let sy = area.top_left.y as u16;
+            #[allow(clippy::cast_sign_loss)]
+            let ex = bottom_right.x as u16;
+            #[allow(clippy::cast_sign_loss)]
+            let ey = bottom_right.y as u16;
+            self.set_pixels((sx, sy), (ex, ey), &mut colors)
+        })
+    }
+
+    fn fill_solid(&mut self, area: &Rectangle, color: Self::Color) -> Result<(), Self::Error> {
+        let (width, height) = self.bounds();
+        let area = area.intersection(&Rectangle {
+            top_left: Point::zero(),
+            size: Size::new(width.into(), height.into()),
+        });
+
+        area.bottom_right().map_or(Ok(()), |bottom_right| {
+            let mut count = 0u32;
+            let max = area.size.width * area.size.height;
+
+            let mut colors = core::iter::repeat(color.into_storage()).take_while(|_| {
+                count += 1;
+                count <= max
+            });
+
+            #[allow(clippy::cast_sign_loss)]
+            let sx = area.top_left.x as u16;
+            #[allow(clippy::cast_sign_loss)]
+            let sy = area.top_left.y as u16;
+            #[allow(clippy::cast_sign_loss)]
+            let ex = bottom_right.x as u16;
+            #[allow(clippy::cast_sign_loss)]
+            let ey = bottom_right.y as u16;
+            self.set_pixels((sx, sy), (ex, ey), &mut colors)
+        })
+    }
+
+    fn clear(&mut self, color: Self::Color) -> Result<(), Self::Error> {
+        let (width, height) = self.bounds();
+        self.fill_solid(
+            &Rectangle {
+                top_left: Point::new(0, 0),
+                size: Size::new(width.into(), height.into()),
+            },
+            color,
+        )
     }
 }
