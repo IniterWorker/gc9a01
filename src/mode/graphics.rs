@@ -2,13 +2,6 @@
 
 use display_interface::{DisplayError, WriteOnlyDataCommand};
 
-use embedded_graphics_core::pixelcolor::IntoStorage;
-use embedded_graphics_core::{
-    pixelcolor::raw::RawU16,
-    prelude::{Point, RawData},
-    primitives::Rectangle,
-};
-
 use crate::{
     display::{DisplayDefinition, NewZeroed},
     rotation::DisplayRotation,
@@ -249,7 +242,11 @@ use embedded_graphics_core::{
     draw_target::DrawTarget,
     geometry::Size,
     geometry::{Dimensions, OriginDimensions},
+    pixelcolor::raw::RawU16,
+    pixelcolor::IntoStorage,
     pixelcolor::Rgb565,
+    prelude::{Point, RawData},
+    primitives::Rectangle,
     Pixel,
 };
 
