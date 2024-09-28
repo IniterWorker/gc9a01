@@ -124,8 +124,19 @@ where
     /// # Errors
     ///
     /// This method may return an error if there are communication issues with the display.
+    #[deprecated(note = "Use `draw_buffer` instead")]
     pub fn draw(&mut self, buffer: &[u8]) -> Result<(), DisplayError> {
         self.interface.send_data(DataFormat::U8(buffer))
+    }
+
+    /// Send a raw buffer to the screen.
+    ///
+    /// # Errors
+    ///
+    /// This method may return an error if there are communication issues with the display.
+    pub fn draw_buffer(&mut self, buffer: &[u16]) -> Result<(), DisplayError> {
+        self.interface
+            .send_data(DataFormat::U16BEIter(&mut buffer.iter().copied()))
     }
 
     /// Send a raw buffer zeroed to the screen.
