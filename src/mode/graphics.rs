@@ -170,6 +170,7 @@ where
     /// # Errors
     ///
     /// This method may return an error if there are communication issues with the display.
+    /// This method may return an error if there are an out of bounds error.
     pub fn set_pixels<T>(
         &mut self,
         start: (u16, u16),
@@ -350,7 +351,7 @@ where
     }
 
     fn clear(&mut self, color: Self::Color) -> Result<(), Self::Error> {
-        let (width, height) = self.bounds();
+        let (width, height) = self.dimensions();
         self.fill_solid(
             &Rectangle {
                 top_left: Point::new(0, 0),

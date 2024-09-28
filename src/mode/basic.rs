@@ -204,7 +204,7 @@ where
     }
 
     fn clear(&mut self, color: Self::Color) -> Result<(), Self::Error> {
-        let (width, height) = self.bounds();
+        let (width, height) = self.dimensions();
         self.fill_solid(
             &Rectangle {
                 top_left: Point::new(0, 0),
