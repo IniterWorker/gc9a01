@@ -167,14 +167,89 @@ where
         )
     }
 
-    /// Send a raw buffer zeroed to the screen.
+    /// Clears the screen by sending a zeroed buffer using a custom stack size for allocation.
+    ///
+    /// This function uses a stack-allocated buffer of size `CLEAR_SIZE_STACK` to send
+    /// a portion of the screen-clearing data to the display. The full display area is divided
+    /// into smaller chunks of size `CLEAR_SIZE_STACK`, which are then sent iteratively to avoid
+    /// allocating large amounts of memory on the stack in one go.
+    ///
+    /// This function uses `set_draw_area`.
+    ///
+    /// # Type Parameters
+    ///
+    /// - `CLEAR_SIZE_STACK`: The size of the stack-allocated buffer used to send each chunk of data
+    ///   to the display. This value determines the number of zeroed `u16` values sent per iteration.
     ///
     /// # Errors
     ///
-    /// This method may return an error if there are communication issues with the display.
+    /// This method returns an error if there are communication issues while sending the data
+    /// to the display.
+    ///
+    /// # Example
+    ///
+    /// ```rust(ignore)
+    /// // Clear the display using a stack allocation of 64 `u16` values per iteration
+    /// display.clear_fit_custom_stack::<64>()?;
+    /// ```
+    ///
+    /// # Panics
+    ///
+    /// This method will stackoverflow if the value of `CLEAR_SIZE_STACK` exceeds the remaining available stack space.
+    pub fn clear_fit_custom_stack<const CLEAR_SIZE_STACK: usize>(
+        &mut self,
+    ) -> Result<(), DisplayError> {
+        // Allocate a zeroed buffer on the stack
+        let stack_alloc = [0; CLEAR_SIZE_STACK];
+
+        // Get the width and height of the display
+        let (width, height) = self.bounds();
+        let total_size = (width * height) as usize;
+
+        // Calculate how many chunks of size CLEAR_SIZE_STACK are needed
+        let mut total_it = total_size / CLEAR_SIZE_STACK;
+
+        // Set the draw area to the entire screen
+        self.set_draw_area((0, 0), (width, height))?;
+
+        // Send the zeroed buffer in chunks until the entire screen is cleared
+        while total_it > 1 {
+            self.interface
+                .send_data(DataFormat::U16BEIter(&mut stack_alloc.iter().copied()))?;
+            total_it -= 1;
+        }
+
+        Ok(())
+    }
+
+    /// Clears the screen by sending a zeroed buffer using a default stack size.
+    ///
+    /// This method sends zeroed `u16` values to the display in chunks to clear the entire screen.
+    /// It uses a default stack allocation size of 32 `u16` values (64 bytes) per iteration,
+    /// making it suitable for most small embedded contexts where stack space is limited.
+    ///
+    /// If you need to customize the size of the stack-allocated buffer, use
+    /// [`clear_fit_custom_stack`] with a specific stack size.
+    ///
+    /// This function uses `set_draw_area`.
+    ///
+    /// # Errors
+    ///
+    /// This method returns an error if there are communication issues while sending the data
+    /// to the display.
+    ///
+    /// # Notes
+    ///
+    /// The default stack allocation size is 64 bytes (32 `u16` values).
+    ///
+    /// # Example
+    ///
+    /// ```rust(ignore)
+    /// // Clear the display using the default stack allocation of 64 bytes
+    /// display.clear_fit()?;
+    /// ```
     pub fn clear_fit(&mut self) -> Result<(), DisplayError> {
-        self.interface
-            .send_data(DataFormat::U16(&[0, D::HEIGHT * D::WIDTH]))
+        self.clear_fit_custom_stack::<32>()
     }
 
     /// Set the screen rotation.
