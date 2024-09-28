@@ -186,13 +186,6 @@ where
     /// This method returns an error if there are communication issues while sending the data
     /// to the display.
     ///
-    /// # Example
-    ///
-    /// ```rust(ignore)
-    /// // Clear the display using a stack allocation of 64 `u16` values per iteration
-    /// display.clear_fit_custom_stack::<64>()?;
-    /// ```
-    ///
     /// # Panics
     ///
     /// This method will stackoverflow if the value of `CLEAR_SIZE_STACK` exceeds the remaining available stack space.
@@ -241,13 +234,6 @@ where
     /// # Notes
     ///
     /// The default stack allocation size is 64 bytes (32 `u16` values).
-    ///
-    /// # Example
-    ///
-    /// ```rust(ignore)
-    /// // Clear the display using the default stack allocation of 64 bytes
-    /// display.clear_fit()?;
-    /// ```
     pub fn clear_fit(&mut self) -> Result<(), DisplayError> {
         self.clear_fit_custom_stack::<32>()
     }
