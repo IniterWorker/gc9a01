@@ -350,6 +350,16 @@ where
         Ok(())
     }
 
+    /// Set the hardware framebuffer to await incoming colors
+    ///
+    /// # Errors
+    ///
+    /// This method may return an error if there are communication issues with the display.
+    pub fn set_write_mode(&mut self) -> Result<(), DisplayError> {
+        Command::MemoryWrite.send(&mut self.interface)?;
+        Ok(())
+    }
+
     /// Get screen rotation
     pub const fn get_screen_rotation(&self) -> DisplayRotation {
         self.display_rotation
