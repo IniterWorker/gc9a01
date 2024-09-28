@@ -7,6 +7,9 @@ use crate::{
     rotation::DisplayRotation,
     Gc9a01,
 };
+
+use super::DisplayConfiguration;
+
 use embedded_hal::delay::DelayNs;
 
 /// Buffered Graphic Implementation
@@ -249,8 +252,6 @@ use embedded_graphics_core::{
     primitives::Rectangle,
     Pixel,
 };
-
-use super::DisplayConfiguration;
 
 #[cfg(feature = "graphics")]
 impl<I, D> OriginDimensions for Gc9a01<I, D, BufferedGraphics<D>>
