@@ -139,6 +139,34 @@ where
             .send_data(DataFormat::U16BEIter(&mut buffer.iter().copied()))
     }
 
+    /// Send the data to the display for drawing at the current position in the framebuffer
+    /// and advance the position accordingly. Ref. `set_draw_area` to modify the affected area by
+    /// this method.
+    ///
+    /// # Notes
+    ///
+    /// This method takes advantage of the bounding box for faster writes. Meaning, it will
+    /// split into chuncks of write operations.
+    ///
+    /// # Errors
+    ///
+    /// This method may return an error if there are communication issues with the display.
+    pub fn bounded_draw(
+        &mut self,
+        buffer: &[u16],
+        disp_width: usize,
+        upper_left: (u16, u16),
+        lower_right: (u16, u16),
+    ) -> Result<(), DisplayError> {
+        Self::flush_buffer_chunks(
+            &mut self.interface,
+            buffer,
+            disp_width,
+            upper_left,
+            lower_right,
+        )
+    }
+
     /// Send a raw buffer zeroed to the screen.
     ///
     /// # Errors
