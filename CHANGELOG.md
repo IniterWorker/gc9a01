@@ -4,7 +4,7 @@ Rust implementation SPI 4-wire driver for the [`Gc9a01`](https://crates.io/crate
 
 <!-- next-header -->
 
-## [0.4.0] - 2024-09-29
+## [0.4.1] - 2024-09-29
 
 ### Added
 
@@ -77,7 +77,7 @@ Rust implementation SPI 4-wire driver for the [`Gc9a01`](https://crates.io/crate
 <!-- next-url -->
 [unreleased]: https://github.com/IniterWorker/gc9a01/compare/0.3.1...HEAD
 
-[0.4.0]: https://github.com/IniterWorker/gc9a01/compare/0.3.1...0.4.0
+[0.4.1]: https://github.com/IniterWorker/gc9a01/compare/0.3.1...0.4.1
 [0.3.1]: https://github.com/IniterWorker/gc9a01/compare/0.3.0...0.3.1
 [0.3.0]: https://github.com/IniterWorker/gc9a01/compare/0.2.1...0.3.0
 [0.2.1]: https://github.com/IniterWorker/gc9a01/compare/0.2.0...0.2.1
