@@ -197,7 +197,7 @@ where
         let buffer_len = self.mode.buffer.as_mut().len();
 
         for color in colors {
-            if buffer_index < buffer_len {
+            if buffer_index >= buffer_len {
                 return Err(DisplayError::OutOfBoundsError);
             }
 
