@@ -4,6 +4,13 @@ Rust implementation SPI 4-wire driver for the [`Gc9a01`](https://crates.io/crate
 
 <!-- next-header -->
 
+## [0.4.2] - 2024-10-18
+
+### Fixed
+
+* Fix: remove regression optimized DrawTarget
+* Fix: Correct bounds check in set_pixels function for proper out-of-bounds handling
+
 ## [0.4.1] - 2024-09-29
 
 ### Added
