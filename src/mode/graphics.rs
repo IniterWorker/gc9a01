@@ -247,10 +247,8 @@ use embedded_graphics_core::{
     geometry::Size,
     geometry::{Dimensions, OriginDimensions},
     pixelcolor::raw::RawU16,
-    pixelcolor::IntoStorage,
     pixelcolor::Rgb565,
-    prelude::{Point, RawData},
-    primitives::Rectangle,
+    prelude::RawData,
     Pixel,
 };
 
@@ -292,72 +290,5 @@ where
                 self.set_pixel(pos.x as u32, pos.y as u32, color);
             });
         Ok(())
-    }
-
-    fn fill_contiguous<O>(&mut self, area: &Rectangle, colors: O) -> Result<(), Self::Error>
-    where
-        O: IntoIterator<Item = Self::Color>,
-    {
-        area.bottom_right().map_or(Ok(()), |bottom_right| {
-            let mut count = 0u32;
-            let max = area.size.width * area.size.height;
-
-            let mut colors = colors
-                .into_iter()
-                .take_while(|_| {
-                    count += 1;
-                    count <= max
-                })
-                .map(|color| RawU16::from(color).into_inner());
-
-            #[allow(clippy::cast_sign_loss)]
-            let sx = area.top_left.x as u16;
-            #[allow(clippy::cast_sign_loss)]
-            let sy = area.top_left.y as u16;
-            #[allow(clippy::cast_sign_loss)]
-            let ex = bottom_right.x as u16;
-            #[allow(clippy::cast_sign_loss)]
-            let ey = bottom_right.y as u16;
-            self.set_pixels((sx, sy), (ex, ey), &mut colors)
-        })
-    }
-
-    fn fill_solid(&mut self, area: &Rectangle, color: Self::Color) -> Result<(), Self::Error> {
-        let (width, height) = self.bounds();
-        let area = area.intersection(&Rectangle {
-            top_left: Point::zero(),
-            size: Size::new(width.into(), height.into()),
-        });
-
-        area.bottom_right().map_or(Ok(()), |bottom_right| {
-            let mut count = 0u32;
-            let max = area.size.width * area.size.height;
-
-            let mut colors = core::iter::repeat(color.into_storage()).take_while(|_| {
-                count += 1;
-                count <= max
-            });
-
-            #[allow(clippy::cast_sign_loss)]
-            let sx = area.top_left.x as u16;
-            #[allow(clippy::cast_sign_loss)]
-            let sy = area.top_left.y as u16;
-            #[allow(clippy::cast_sign_loss)]
-            let ex = bottom_right.x as u16;
-            #[allow(clippy::cast_sign_loss)]
-            let ey = bottom_right.y as u16;
-            self.set_pixels((sx, sy), (ex, ey), &mut colors)
-        })
-    }
-
-    fn clear(&mut self, color: Self::Color) -> Result<(), Self::Error> {
-        let (width, height) = self.dimensions();
-        self.fill_solid(
-            &Rectangle {
-                top_left: Point::new(0, 0),
-                size: Size::new(width.into(), height.into()),
-            },
-            color,
-        )
     }
 }
