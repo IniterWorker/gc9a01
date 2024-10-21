@@ -44,6 +44,15 @@ where
             max_y: u16::MIN,
         }
     }
+
+    pub fn buffer(&self) -> &D::Buffer {
+        &self.buffer
+    }
+
+    /// Get a mutable reference to the current buffer
+    pub fn buffer_mut(&mut self) -> &mut D::Buffer {
+        &mut self.buffer
+    }
 }
 
 impl<I, D, DELAY> DisplayConfiguration<DELAY> for Gc9a01<I, D, BufferedGraphics<D>>
@@ -238,6 +247,15 @@ where
 
             *color = value;
         }
+    }
+
+    pub fn buffer(&self) -> &D::Buffer {
+        self.mode.buffer()
+    }
+
+    /// Get a mutable reference to the current buffer
+    pub fn buffer_mut(&mut self) -> &mut D::Buffer {
+        self.mode.buffer_mut()
     }
 }
 
