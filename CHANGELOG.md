@@ -4,7 +4,7 @@ Rust implementation SPI 4-wire driver for the [`Gc9a01`](https://crates.io/crate
 
 <!-- next-header -->
 
-## [0.5.0] - Unreleased
+## [0.5.0] - 2026-11-15
 
 ### Added
 
@@ -14,6 +14,7 @@ Rust implementation SPI 4-wire driver for the [`Gc9a01`](https://crates.io/crate
 * Buffered mode accepts caller-provided framebuffer via `into_buffered_graphics_with_buffer`
 * `Gc9a01::into_basic_mode` and `Gc9a01::release` (and async counterparts)
 * Optimized buffered `DrawTarget` methods: `fill_contiguous`, `fill_solid`, `clear`
+* Nix flake development environment (`nix develop`, `nix flake check`) with pinned toolchain and thumbv7em target; `Cargo.lock` now tracked for reproducibility
 
 ### Changed
 
@@ -107,8 +108,9 @@ Rust implementation SPI 4-wire driver for the [`Gc9a01`](https://crates.io/crate
 - Move playgrounds outside the library project.
 
 <!-- next-url -->
-[unreleased]: https://github.com/IniterWorker/gc9a01/compare/0.3.1...HEAD
-
+[unreleased]: https://github.com/IniterWorker/gc9a01/compare/0.5.0...HEAD
+[0.5.0]: https://github.com/IniterWorker/gc9a01/compare/0.4.2...0.5.0
+[0.4.2]: https://github.com/IniterWorker/gc9a01/compare/0.4.1...0.4.2
 [0.4.1]: https://github.com/IniterWorker/gc9a01/compare/0.3.1...0.4.1
 [0.3.1]: https://github.com/IniterWorker/gc9a01/compare/0.3.0...0.3.1
 [0.3.0]: https://github.com/IniterWorker/gc9a01/compare/0.2.1...0.3.0
