@@ -95,38 +95,43 @@ where
         self.into_mode(BufferedGraphics::new())
     }
 
-    /// Initialise the screen in one of the available addressing modes.
+    /// Convert into buffered graphics mode with a caller-provided framebuffer.
     ///
-    /// # Errors
-    ///
-    /// This method may return an error if there are communication issues with the display.
-    pub fn init_with_addr_mode(&mut self, delay: &mut impl DelayNs) -> Result<(), DisplayError> {
-        // TODO: implement initialization sequence
-
-        let rotation = self.display_rotation;
-
-        // Dedicated/Custom implementation override
-        self.display.configure(&mut self.interface, delay)?;
-
-        // Enforced context parameters
-        self.set_display_rotation(rotation)?;
-        self.set_brightness(Brightness::default())?;
-
-        // Command::MemoryAddressingMode(mode).send(&mut self.interface)?;
-        Command::DisplayState(Logical::On).send(&mut self.interface)?;
-        delay.delay_ms(120);
-
-        Ok(())
+    /// The driver then carries the buffer's type/lifetime (`B`), e.g.
+    /// `&'a mut [u16]` or `[u16; N]`, keeping the frame out of the driver
+    /// struct's own storage choice. Buffer must hold exactly
+    /// `WIDTH * HEIGHT` elements (debug-asserted; see [`BufferedGraphics::with_buffer`]).
+    pub fn into_buffered_graphics_with_buffer<B: AsMut<[u16]>>(
+        self,
+        buffer: B,
+    ) -> Gc9a01<I, D, BufferedGraphics<D, B>> {
+        self.into_mode(BufferedGraphics::with_buffer(buffer))
     }
 
-    /// Send a raw buffer to the screen.
+    /// Convert the display into basic mode.
+    pub fn into_basic_mode(self) -> Gc9a01<I, D, BasicMode> {
+        self.into_mode(BasicMode::new())
+    }
+
+    /// Release the owned transport interface.
+    pub fn release(self) -> I {
+        self.interface
+    }
+
+    /// Initialise the screen: panel configure, rotation, default
+    /// brightness, display on, then 120 ms delay.
     ///
     /// # Errors
     ///
     /// This method may return an error if there are communication issues with the display.
-    #[deprecated(note = "Use `draw_buffer` instead")]
-    pub fn draw(&mut self, buffer: &[u8]) -> Result<(), DisplayError> {
-        self.interface.send_data(DataFormat::U8(buffer))
+    pub fn init(&mut self, delay: &mut impl DelayNs) -> Result<(), DisplayError> {
+        let rotation = self.display_rotation;
+        self.display.configure(&mut self.interface, delay)?;
+        self.set_display_rotation(rotation)?;
+        self.set_brightness(Brightness::default())?;
+        Command::DisplayState(Logical::On).send(&mut self.interface)?;
+        delay.delay_ms(120);
+        Ok(())
     }
 
     /// Send a raw buffer to the screen.
@@ -192,26 +197,24 @@ where
     pub fn clear_fit_custom_stack<const CLEAR_SIZE_STACK: usize>(
         &mut self,
     ) -> Result<(), DisplayError> {
-        // Allocate a zeroed buffer on the stack
+        if CLEAR_SIZE_STACK == 0 {
+            return Err(DisplayError::OutOfBoundsError);
+        }
         let stack_alloc = [0; CLEAR_SIZE_STACK];
-
-        // Get the width and height of the display
         let (width, height) = self.bounds();
         let total_size = (width * height) as usize;
-
-        // Calculate how many chunks of size CLEAR_SIZE_STACK are needed
-        let mut total_it = total_size / CLEAR_SIZE_STACK;
-
-        // Set the draw area to the entire screen
+        let chunks = total_size.div_ceil(CLEAR_SIZE_STACK);
+        let remainder = total_size % CLEAR_SIZE_STACK;
         self.set_draw_area((0, 0), (width, height))?;
-
-        // Send the zeroed buffer in chunks until the entire screen is cleared
-        while total_it > 1 {
+        for i in 0..chunks {
+            let n = if remainder != 0 && i + 1 == chunks {
+                remainder
+            } else {
+                CLEAR_SIZE_STACK
+            };
             self.interface
-                .send_data(DataFormat::U16BEIter(&mut stack_alloc.iter().copied()))?;
-            total_it -= 1;
+                .send_data(DataFormat::U16BEIter(&mut stack_alloc[..n].iter().copied()))?;
         }
-
         Ok(())
     }
 
@@ -284,7 +287,7 @@ where
                 Logical::Off,
             )
             .send(&mut self.interface)?,
-        };
+        }
 
         Ok(())
     }
@@ -295,7 +298,7 @@ where
     ///
     /// This method may return an error if there are communication issues with the display.
     pub fn set_brightness(&mut self, brightness: Brightness) -> Result<(), DisplayError> {
-        Command::DisplayBrightness(brightness.brightness).send(&mut self.interface)
+        Command::DisplayBrightness(brightness).send(&mut self.interface)
     }
 
     /// Set hardware screen state
@@ -380,23 +383,110 @@ where
         lower_right: (u16, u16),
     ) -> Result<(), DisplayError> {
         Command::MemoryWrite.send(interface)?;
+        for (start, len) in row_ranges(disp_width, upper_left, lower_right) {
+            let row = buffer
+                .get(start..start + len)
+                .ok_or(DisplayError::OutOfBoundsError)?;
+            interface.send_data(DataFormat::U16BEIter(&mut row.iter().copied()))?;
+        }
+        Ok(())
+    }
+}
 
-        // Number of rows to process (Y range)
-        let num_pages = (lower_right.1 - upper_left.1 + 1) as usize;
+/// Pure row-range arithmetic shared by blocking and async flush paths.
+/// Yields `(start_index, len)` per row inside `upper_left..=lower_right`.
+pub(crate) fn row_ranges(
+    disp_width: usize,
+    upper_left: (u16, u16),
+    lower_right: (u16, u16),
+) -> impl Iterator<Item = (usize, usize)> {
+    let num_pages = if lower_right.1 >= upper_left.1 {
+        (lower_right.1 - upper_left.1 + 1) as usize
+    } else {
+        0
+    };
+    let starting_page = upper_left.1 as usize;
+    let page_lower = upper_left.0 as usize;
+    let page_upper = ((lower_right.0 as usize) + 1).min(disp_width);
+    let len = page_upper.saturating_sub(page_lower);
+    (0..num_pages).map(move |r| ((starting_page + r) * disp_width + page_lower, len))
+}
 
-        // Starting row (Y coordinate)
-        let starting_page = upper_left.1 as usize;
+#[cfg(test)]
+#[allow(clippy::unwrap_used, clippy::panic)]
+mod tests {
+    use super::*;
+    use crate::display::DisplayResolution240x240;
+    use crate::test_helpers::{FakeDelay, FakeInterface, RecordKind};
 
-        // X coordinates (columns) for the rectangle
-        let page_lower = upper_left.0 as usize;
-        let page_upper = ((lower_right.0 + 1) as usize).min(disp_width); // +1 to include the last column
+    fn make() -> Gc9a01<FakeInterface, DisplayResolution240x240, BasicMode> {
+        Gc9a01::new(
+            FakeInterface::new(),
+            DisplayResolution240x240,
+            DisplayRotation::Rotate0,
+        )
+    }
 
-        // Process the buffer in rows (chunks of disp_width)
-        buffer
-            .chunks(disp_width)
-            .skip(starting_page)
-            .take(num_pages)
-            .map(|s| &s[page_lower..page_upper])
-            .try_for_each(|c| interface.send_data(DataFormat::U16BEIter(&mut c.iter().copied())))
+    #[test]
+    fn init_ends_display_on_and_delay() {
+        let mut d = make();
+        let mut delay = FakeDelay::new();
+        d.init(&mut delay).unwrap();
+        let ops = d.interface.opcodes();
+        assert_eq!(*ops.last().unwrap(), 0x29);
+        // configure 120ms + init tail 120ms
+        assert_eq!(delay.total_ms_from_ns(), 240);
+    }
+
+    #[test]
+    fn set_draw_area_emits_col_then_row() {
+        let mut d = make();
+        d.set_draw_area((1, 2), (3, 4)).unwrap();
+        let got: Vec<(RecordKind, Vec<u8>)> = d
+            .interface
+            .records
+            .iter()
+            .map(|r| (r.kind, r.bytes.clone()))
+            .collect();
+        assert_eq!(
+            got,
+            vec![
+                (RecordKind::Commands, vec![0x2A]),
+                (RecordKind::Data, vec![0, 1, 0, 3]),
+                (RecordKind::Commands, vec![0x2B]),
+                (RecordKind::Data, vec![0, 2, 0, 4]),
+            ]
+        );
+    }
+
+    #[test]
+    fn dimensions_bounds_all_rotations() {
+        for rot in [
+            DisplayRotation::Rotate0,
+            DisplayRotation::Rotate90,
+            DisplayRotation::Rotate180,
+            DisplayRotation::Rotate270,
+        ] {
+            let mut d = make();
+            d.display_rotation = rot;
+            assert_eq!(d.dimensions(), (240, 240), "{rot:?}");
+            assert_eq!(d.bounds(), (239, 239), "{rot:?}");
+        }
+    }
+
+    #[test]
+    fn clear_fit_sends_full_pixel_count() {
+        let mut d = make();
+        d.clear_fit().unwrap();
+        // data total = col/row params (8) + pixels. bounds-based total_size = 239*239 pixels.
+        let expected_pixels = 239usize * 239;
+        assert_eq!(d.interface.data_bytes_total(), 8 + expected_pixels * 2);
+    }
+
+    #[test]
+    fn clear_fit_zero_stack_errors_no_traffic() {
+        let mut d = make();
+        assert!(d.clear_fit_custom_stack::<0>().is_err());
+        assert_eq!(d.interface.records.len(), 0);
     }
 }

@@ -4,6 +4,33 @@
 
 use display_interface::{DataFormat::U8, DisplayError, WriteOnlyDataCommand};
 
+use crate::brightness::Brightness;
+
+/// Encoded command frame: opcode byte followed by parameter bytes.
+#[derive(Debug, Copy, Clone, PartialEq, Eq)]
+pub struct EncodedCommand {
+    bytes: [u8; 13],
+    len: u8,
+}
+
+impl EncodedCommand {
+    /// Opcode byte (first byte).
+    #[must_use]
+    pub const fn opcode(&self) -> u8 {
+        self.bytes[0]
+    }
+    /// Parameter bytes (bytes after opcode, up to encoded length).
+    #[must_use]
+    pub fn params(&self) -> &[u8] {
+        &self.bytes[1..self.len as usize]
+    }
+    /// Full encoded frame (opcode + params), no trailing padding.
+    #[must_use]
+    pub fn as_bytes(&self) -> &[u8] {
+        &self.bytes[..self.len as usize]
+    }
+}
+
 /// GC9A01 Commands
 #[derive(Debug, Copy, Clone)]
 pub enum Command {
@@ -316,7 +343,7 @@ pub enum Command {
     /// Correspond to the LEDPWM period = 3 ms, the high-level of LEDPWM (high effective) = 2.344ms, and the
     /// low-level of LEDPWM = 0.656ms.
     ///
-    DisplayBrightness(u8),
+    DisplayBrightness(Brightness),
 
     /// Write CTRL Display (53h)
     ///
@@ -734,24 +761,10 @@ pub enum Command {
 }
 
 impl Command {
-    /// Send command to [`Gc9a01`]
-    ///
-    /// # Errors
-    ///
-    /// This method may return an error if there are communication issues with the display.
-    #[allow(clippy::too_many_lines)]
-    pub fn send<DI>(self, iface: &mut DI) -> Result<(), DisplayError>
-    where
-        DI: WriteOnlyDataCommand,
-    {
-        // 16bits command (2bytes)
-        // 16bits param_1 (2bytes)
-        // 16bits param_2 (2bytes)
-        // 16bits param_3 (2bytes)
-        // 16bits param_4 (2bytes)
-        // Maximum 10 bytes
-        // Array Size 5
-        // Transform everything in 10 bytes array
+    /// Encode command into opcode + params frame. Pure; no transport.
+    #[must_use]
+    #[allow(clippy::too_many_lines, clippy::cast_possible_truncation)]
+    pub const fn encode(self) -> EncodedCommand {
         let (data, len): ([u8; 13], usize) = match self {
             Self::SleepMode(level) => (
                 [
@@ -894,7 +907,9 @@ impl Command {
                 ],
                 3,
             ),
-            Self::DisplayBrightness(dbv) => ([0x51, dbv, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], 2),
+            Self::DisplayBrightness(dbv) => {
+                ([0x51, dbv.brightness(), 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], 2)
+            }
             Self::CtrlDisplay(bctrl, dd, bl) => (
                 [
                     0x53,
@@ -1282,12 +1297,46 @@ impl Command {
             ),
             Self::SetUndocumented098h => ([0x98, 0x3e, 0x07, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], 3),
         };
+        EncodedCommand {
+            bytes: data,
+            len: len as u8,
+        }
+    }
 
-        // Send command over the interface
-        // TODO: do something better
-        iface.send_commands(U8(&[data[0]]))?;
-        if len > 1 {
-            iface.send_data(U8(&data[1..len]))?;
+    /// Send command to [`Gc9a01`]
+    ///
+    /// # Errors
+    ///
+    /// This method may return an error if there are communication issues with the display.
+    pub fn send<DI>(self, iface: &mut DI) -> Result<(), DisplayError>
+    where
+        DI: WriteOnlyDataCommand,
+    {
+        let encoded = self.encode();
+        iface.send_commands(U8(&[encoded.opcode()]))?;
+        let params = encoded.params();
+        if !params.is_empty() {
+            iface.send_data(U8(params))?;
+        }
+        Ok(())
+    }
+
+    /// Send command over async transport: same encoding and
+    /// commands/data split as blocking [`Command::send`].
+    ///
+    /// # Errors
+    ///
+    /// This method may return an error if there are communication issues with the display.
+    #[cfg(feature = "async")]
+    pub async fn send_async<DI>(self, iface: &mut DI) -> Result<(), DisplayError>
+    where
+        DI: crate::interface::AsyncWriteOnlyDataCommand,
+    {
+        let encoded = self.encode();
+        iface.send_commands(&[encoded.opcode()]).await?;
+        let params = encoded.params();
+        if !params.is_empty() {
+            iface.send_data(params).await?;
         }
         Ok(())
     }
@@ -1814,4 +1863,119 @@ pub struct Gamma4 {
     pub vr50_p: u8,
     /// dig2gam_vr63_p
     pub vr63_p: u8,
+}
+
+#[cfg(test)]
+#[allow(clippy::unwrap_used, clippy::panic)]
+mod tests {
+    use super::*;
+    use crate::test_helpers::{FakeInterface, RecordKind};
+
+    fn send(cmd: Command) -> Vec<(RecordKind, Vec<u8>)> {
+        let mut f = FakeInterface::new();
+        cmd.send(&mut f).unwrap();
+        f.records
+            .iter()
+            .map(|r| (r.kind, r.bytes.clone()))
+            .collect()
+    }
+
+    #[test]
+    fn golden_sleep() {
+        assert_eq!(
+            send(Command::SleepMode(Logical::On)),
+            vec![(RecordKind::Commands, vec![0x10])]
+        );
+        assert_eq!(
+            send(Command::SleepMode(Logical::Off)),
+            vec![(RecordKind::Commands, vec![0x11])]
+        );
+    }
+    #[test]
+    fn golden_display_state() {
+        assert_eq!(
+            send(Command::DisplayState(Logical::On)),
+            vec![(RecordKind::Commands, vec![0x29])]
+        );
+        assert_eq!(
+            send(Command::DisplayState(Logical::Off)),
+            vec![(RecordKind::Commands, vec![0x28])]
+        );
+    }
+    #[test]
+    fn golden_display_inversion() {
+        assert_eq!(
+            send(Command::DisplayInversion(Logical::On)),
+            vec![(RecordKind::Commands, vec![0x21])]
+        );
+        assert_eq!(
+            send(Command::DisplayInversion(Logical::Off)),
+            vec![(RecordKind::Commands, vec![0x20])]
+        );
+    }
+    #[test]
+    fn golden_column_address() {
+        assert_eq!(
+            send(Command::ColumnAddressSet(0, 239)),
+            vec![
+                (RecordKind::Commands, vec![0x2A]),
+                (RecordKind::Data, vec![0x00, 0x00, 0x00, 0xEF])
+            ]
+        );
+    }
+    #[test]
+    fn golden_row_address() {
+        assert_eq!(
+            send(Command::RowAddressSet(0, 239)),
+            vec![
+                (RecordKind::Commands, vec![0x2B]),
+                (RecordKind::Data, vec![0x00, 0x00, 0x00, 0xEF])
+            ]
+        );
+    }
+    #[test]
+    fn golden_memory_write() {
+        assert_eq!(
+            send(Command::MemoryWrite),
+            vec![(RecordKind::Commands, vec![0x2C])]
+        );
+    }
+    #[test]
+    fn golden_memory_access_control_rotate0() {
+        // Rotate0 combo from driver: Off,Off,Off,On,On,Off => 0x18
+        assert_eq!(
+            send(Command::MemoryAccessControl(
+                Logical::Off,
+                Logical::Off,
+                Logical::Off,
+                Logical::On,
+                Logical::On,
+                Logical::Off
+            )),
+            vec![
+                (RecordKind::Commands, vec![0x36]),
+                (RecordKind::Data, vec![0x18])
+            ]
+        );
+    }
+    #[test]
+    fn golden_pixel_format() {
+        assert_eq!(
+            send(Command::PixelFormatSet(Dbi::Pixel16bits, Dpi::Pixel16bits)),
+            vec![
+                (RecordKind::Commands, vec![0x3A]),
+                (RecordKind::Data, vec![0x55])
+            ]
+        );
+    }
+    #[test]
+    fn golden_brightness() {
+        assert_eq!(
+            send(Command::DisplayBrightness(Brightness::custom(0x5F))),
+            vec![
+                (RecordKind::Commands, vec![0x51]),
+                (RecordKind::Data, vec![0x5F])
+            ]
+        );
+    }
 }

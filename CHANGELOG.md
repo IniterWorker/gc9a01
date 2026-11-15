@@ -4,6 +4,31 @@ Rust implementation SPI 4-wire driver for the [`Gc9a01`](https://crates.io/crate
 
 <!-- next-header -->
 
+## [0.5.0] - Unreleased
+
+### Added
+
+* Async driver `Gc9a01Async` behind feature `async`, with public async transport trait `AsyncWriteOnlyDataCommand` and `AsyncSpiInterface`
+* `Command::encode` returning `EncodedCommand`, shared by blocking and async send paths
+* Panel init sequence as data: `InitStep` and `DisplayDefinition::INIT_STEPS`
+* Buffered mode accepts caller-provided framebuffer via `into_buffered_graphics_with_buffer`
+* `Gc9a01::into_basic_mode` and `Gc9a01::release` (and async counterparts)
+* Optimized buffered `DrawTarget` methods: `fill_contiguous`, `fill_solid`, `clear`
+
+### Changed
+
+* Breaking: `Command::DisplayBrightness` now takes typed `Brightness`; `brightness` is a public module and `Brightness` is re-exported at crate root
+* Breaking: `init_with_addr_mode` renamed to `init`; deprecated `draw` removed
+* Breaking: `DisplayConfiguration` no longer has a `DELAY` type parameter
+* `embedded-graphics-core` floor raised to 0.4.1; `rust-version` set to 1.75
+
+### Fixed
+
+* `clear_fit_custom_stack` sends full pixel count including final partial chunk; zero chunk size errors without transport traffic
+* Basic mode `fill_solid`/`fill_contiguous` clip to display bounds, preserving color alignment
+* Buffered `flush` preserves dirty rectangle on transport error for retry
+* Removed unchecked buffer indexing; crate contains no `unsafe` in `src/`
+
 ## [0.4.2] - 2024-10-18
 
 ### Fixed

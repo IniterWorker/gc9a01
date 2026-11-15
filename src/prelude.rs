@@ -9,3 +9,6 @@ pub use super::{
     mode::DisplayConfiguration,
     rotation::DisplayRotation,
 };
+
+#[cfg(feature = "async")]
+pub use super::{interface::AsyncWriteOnlyDataCommand, mode::AsyncDisplayConfiguration};

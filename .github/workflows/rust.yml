@@ -23,6 +23,14 @@ jobs:
             args: --all-targets --all-features --workspace -- -D warnings
           - command: test
             args: --verbose
+          - command: test
+            args: --features async
+          - command: test
+            args: --no-default-features
+          - command: test
+            args: --no-default-features --features async
+          - command: check
+            args: --target thumbv7em-none-eabihf --all-features
 
     steps:
       - name: Checkout sources

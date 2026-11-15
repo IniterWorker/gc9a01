@@ -7,10 +7,7 @@ pub use graphics::*;
 use crate::rotation::DisplayRotation;
 use embedded_hal::delay::DelayNs;
 
-pub trait DisplayConfiguration<DELAY>
-where
-    DELAY: DelayNs,
-{
+pub trait DisplayConfiguration {
     /// The type representing errors that may occur during display configuration.
     type Error;
 
@@ -19,14 +16,6 @@ where
     /// # Errors
     ///
     /// This method may return an error if there are communication issues with the display.
-    ///
-    /// # Arguments
-    ///
-    /// * `rotation` - The rotation to set for the display.
-    ///
-    /// # Returns
-    ///
-    /// Returns `Ok(())` if the rotation is set successfully, otherwise returns an error.
     fn set_rotation(&mut self, rotation: DisplayRotation) -> Result<(), Self::Error>;
 
     /// Initializes and configures the display for the given mode.
@@ -34,13 +23,29 @@ where
     /// # Errors
     ///
     /// This method may return an error if there are communication issues with the display.
+    fn init(&mut self, delay: &mut impl DelayNs) -> Result<(), Self::Error>;
+}
+
+#[cfg(feature = "async")]
+#[allow(async_fn_in_trait)]
+pub trait AsyncDisplayConfiguration {
+    /// The type representing errors that may occur during display configuration.
+    type Error;
+
+    /// Sets the rotation of the display.
     ///
-    /// # Arguments
+    /// # Errors
     ///
-    /// * `delay` - A mutable reference to the delay provider used for timing operations.
+    /// This method may return an error if there are communication issues with the display.
+    async fn set_rotation(&mut self, rotation: DisplayRotation) -> Result<(), Self::Error>;
+
+    /// Initializes and configures the display for the given mode.
     ///
-    /// # Returns
+    /// # Errors
     ///
-    /// Returns `Ok(())` if the display is successfully initialized and configured, otherwise returns an error.
-    fn init(&mut self, delay: &mut DELAY) -> Result<(), Self::Error>;
+    /// This method may return an error if there are communication issues with the display.
+    async fn init(
+        &mut self,
+        delay: &mut impl embedded_hal_async::delay::DelayNs,
+    ) -> Result<(), Self::Error>;
 }

@@ -6,8 +6,8 @@
 //! The main driver is created using [`Gc9a01::new`] which accepts an interface instance, display,
 //! size, rotation and mode. The following display modes are supported:
 //!
-//! - [`BasicMode`] - A simple mode with lower level methods available.
-//! - [`BufferedGraphics`] - A framebuffered mode with additional methods and integration with
+//! - [`mode::BasicMode`] - A simple mode with lower level methods available.
+//! - [`mode::BufferedGraphics`] - A framebuffered mode with additional methods and integration with
 //!   [embedded-graphics](https://docs.rs/embedded-graphics).
 //!
 //! ## Support
@@ -19,6 +19,58 @@
 //! ## Example
 //!
 //! - [Waveshare esp32-s3-touch-lcd-1-28](https://github.com/IniterWorker/esp32-s3-touch-lcd-1-28)
+//!
+//! ## Buffered graphics example
+//!
+//! ```rust
+//! # fn main() {
+//! # #[cfg(feature = "graphics")]
+//! # {
+//! use display_interface::{DataFormat, DisplayError, WriteOnlyDataCommand};
+//! use embedded_graphics::{
+//!     mono_font::{ascii::FONT_6X10, MonoTextStyle},
+//!     pixelcolor::Rgb565,
+//!     prelude::*,
+//!     primitives::{PrimitiveStyle, Rectangle},
+//!     text::Text,
+//! };
+//! use gc9a01::{display::DisplayResolution240x240, rotation::DisplayRotation, Gc9a01};
+//!
+//! struct Stub;
+//! impl WriteOnlyDataCommand for Stub {
+//!     fn send_commands(&mut self, _cmd: DataFormat<'_>) -> Result<(), DisplayError> { Ok(()) }
+//!     fn send_data(&mut self, _buf: DataFormat<'_>) -> Result<(), DisplayError> { Ok(()) }
+//! }
+//!
+//! let mut display = Gc9a01::new(Stub, DisplayResolution240x240, DisplayRotation::Rotate0)
+//!     .into_buffered_graphics();
+//! Rectangle::new(Point::new(10, 10), Size::new(50, 30))
+//!     .into_styled(PrimitiveStyle::with_fill(Rgb565::RED))
+//!     .draw(&mut display)
+//!     .unwrap();
+//! Text::new("Hi", Point::new(10, 60), MonoTextStyle::new(&FONT_6X10, Rgb565::WHITE))
+//!     .draw(&mut display)
+//!     .unwrap();
+//! display.flush().unwrap();
+//! # }
+//! # }
+//! ```
+//!
+//! ## Basic mode example
+//!
+//! ```rust
+//! use display_interface::{DataFormat, DisplayError, WriteOnlyDataCommand};
+//! use gc9a01::{display::DisplayResolution240x240, rotation::DisplayRotation, Gc9a01};
+//!
+//! struct Stub;
+//! impl WriteOnlyDataCommand for Stub {
+//!     fn send_commands(&mut self, _cmd: DataFormat<'_>) -> Result<(), DisplayError> { Ok(()) }
+//!     fn send_data(&mut self, _buf: DataFormat<'_>) -> Result<(), DisplayError> { Ok(()) }
+//! }
+//!
+//! let mut display = Gc9a01::new(Stub, DisplayResolution240x240, DisplayRotation::Rotate0);
+//! display.set_pixel(10, 20, 0xF800).unwrap();
+//! ```
 //!
 //! ## Hardware
 //!
@@ -50,7 +102,6 @@
 )]
 // clippy deny/error level lints, they always have  quick fix that should be preferred
 #![deny(
-    clippy::multiple_inherent_impl,
     clippy::rc_buffer,
     clippy::rc_mutex,
     clippy::rest_pat_in_fully_bound_structs,
@@ -58,7 +109,6 @@
     clippy::separated_literal_suffix,
     clippy::str_to_string,
     clippy::string_add,
-    clippy::string_to_string,
     clippy::unnecessary_self_imports,
     clippy::unneeded_field_pattern,
     clippy::verbose_file_reads
@@ -69,13 +119,19 @@
     clippy::similar_names,
     clippy::cast_possible_truncation,
     clippy::redundant_pub_crate,
-    clippy::indexing_slicing
+    clippy::indexing_slicing,
+    // Typestate modes intentionally split inherent impls per mode module.
+    clippy::multiple_inherent_impl
 )]
 
+// export brightness
+pub mod brightness;
 // export commands
 pub mod command;
 // export screen configuration
 pub mod display;
+// export async transport trait
+pub mod interface;
 // export modes
 pub mod mode;
 // prelude
@@ -83,10 +139,21 @@ pub mod prelude;
 // export screen rotation mode
 pub mod rotation;
 
-mod brightness;
 mod driver;
+#[cfg(feature = "async")]
+mod driver_async;
 mod spi;
 
+#[cfg(test)]
+pub(crate) mod test_helpers;
+
 // export the driver and interface
+pub use brightness::Brightness;
 pub use driver::Gc9a01;
+#[cfg(feature = "async")]
+pub use driver_async::Gc9a01Async;
+#[cfg(feature = "async")]
+pub use interface::AsyncWriteOnlyDataCommand;
+#[cfg(feature = "async")]
+pub use spi::AsyncSpiInterface;
 pub use spi::SPIDisplayInterface;
