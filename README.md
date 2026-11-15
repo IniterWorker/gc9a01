@@ -83,6 +83,23 @@ display.set_pixel(10, 20, 0xF800).unwrap();
 
 - [1.28 inch TFT LCD Display Module Round RGB 240*240 GC9A01 Driver 4 Wire SPI](https://www.aliexpress.com/item/1005001382069930.html)
 
+## Development
+
+A reproducible development environment is provided as a Nix flake
+(stable Rust with clippy/rustfmt, the `thumbv7em-none-eabihf` stdlib for
+the `no_std` cross check, `just`, and `cargo-readme`):
+
+```sh
+nix develop        # or: direnv allow (uses .envrc)
+cargo test --features async
+cargo clippy --all-targets --all-features -- -D warnings
+cargo check --target thumbv7em-none-eabihf --all-features
+```
+
+`nix flake check` builds the crate and runs the test suites with
+default and `async` features in the Nix sandbox. `nix build` /
+`nix build .#async` produce the same checks as packages.
+
 ## Inspiration
 
 - From [jamwaffles/ssd1306](https://github.com/jamwaffles/ssd1306)
